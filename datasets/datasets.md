@@ -1,3 +1,6 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:fee85830848c1afe8015671eb6e4cde0583847ec6419512811601a0e3c4cca9f
-size 290
+### Why is there nothing in this folder?
+because I'm too lazy to even try uploading a dataset here since they're wayyyy too big.
+
+### Where can I get the datasets then?
+here: https://1drv.ms/u/s!AhlyA7QXGhFCqWLaQLR5DphAwosA?e=fo9ukb
+just populate this folder with everything in that folder. yeah thats about it.
