@@ -1,3 +1,5 @@
 .ipynb_checkpoints
 /datasets
 /saved_models
+.vscode
+.idea
