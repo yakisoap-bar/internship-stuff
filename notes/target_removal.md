@@ -2,7 +2,7 @@
 
 > This document contains the observations of model behaviour when certain classes are removed from model training, then run through the model as prediction records
 
-Model was trained as per normal without `LTE` and `FM` records, as these had similar counterparts in the train dataset, namely `WIFI` and `FNET` respectively. The test dataset was also split into 2, one for validation of model performance with known data, which included everything but `LTE` and `FM` records, and another for testing unknown data behaviour, which included only `LTE` and `FM` records. 
+Model was trained as per normal without `LTE` and `FM` records, as these had similar counterparts in the train dataset, namely `WIFI` and `FNET` respectively. The test dataset was also split into 2, one for validation of model performance with known data, which included everything but `LTE` and `FM` records, and another for testing unknown data behaviour, which included only `LTE` and `FM` records.
 
 ![known classification](./assets/known_classifications.png)
 
