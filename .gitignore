@@ -4,3 +4,4 @@
 /.vscode
 /.idea
 .replit
+node_modules
