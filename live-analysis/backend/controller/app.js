@@ -6,7 +6,7 @@ const axios = require('axios');
 const math = require('mathjs');
 
 // initialise express server
-const app = express()
+const app = express();
 
 // set up stuff
 app.use(bodyParser.json());
@@ -29,26 +29,14 @@ app.post('/predict', (req, res) => {
         return;
     }
 
-    records.forEach(record => {
-        if (record.length < 2) {
-            res.status(400).send({'message' : 'Error: One or more records are invalid.'});
-            return;
-
-        } else if (!Array.isArray(record)) {
-            res.status(400).send({'message' : 'Error: Invalid data format.'});
-            return;
-        }
-
-        record.forEach(part => {
-            if (part.length < 1024) {
-                res.status(400).send({'message' : 'Error: One or more records are invalid.'});
-                return;
-            }
-        })
-    })
+    // check if array shape is valid
+    shape = math.size(records);
+    
+    if (JSON.stringify(shape.slice(-2)) != JSON.stringify([2, 1024])) {
+        return res.status(500).send({'message' : 'Error: Data is not in correct format.'});
+    }
 
     // reshape records for prediction
-    shape = math.size(records);
     shape.push(1);
     records = math.reshape(records, shape);
 
@@ -74,7 +62,7 @@ app.post('/predict', (req, res) => {
         })
     }).catch(err => {
         console.log(err);
-        res.status(500).send({'message': 'Error: Prediction unsuccessful', 'errorMsg': err.stack});
+        res.status(500).send({'message': 'Error: Prediction unsuccessful.', 'errorMsg': err.stack});
         return;
     })
 })
