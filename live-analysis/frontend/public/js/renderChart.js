@@ -19,9 +19,9 @@ let options = {
 
 // Data
 let records = {
-    labels: 'No. of records',
+    labels: ['Wifi', 'BNET', 'FASTNET', 'Bluetooth', '4G', 'FM'],
     datasets:[{
-        label: ['Wifi', 'BNET', 'FASTNET', 'Bluetooth', '4G', 'FM'],
+        label: 'No. of records',
         data: [12, 19, 3, 5, 2, 3],
         backgroundColor: deco.bgCol,
         borderColor: deco.borderCol,
@@ -36,4 +36,6 @@ let chartData = {
     options: options
 };
 
-const myChart = new Chart(ctx, chartData);
+$(document).ready(function(){
+    const myChart = new Chart(ctx, chartData);
+})
