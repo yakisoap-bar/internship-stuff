@@ -15,7 +15,12 @@
 	<div class="jumbotron text-center bg-dark text-white box">
 		<br>
 		<h1>Upload</h1>
-		<p>Yes</p>
+		<br>
+		<form action="">
+			<input type="file" id="dataFile" name="filename">
+			<br>
+			<button type="submit" id="submitFile" class="btn btn-success">Upload</button>
+		</form>
 		<br>
 	</div>
 
@@ -26,10 +31,13 @@
 		<canvas id="myChart"></canvas>
 	</div>
 
-	<!-- Utils -->
-	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<!--Libraries-->
+	<script src="jquery.js"></script>
+	<script src="chart.js"></script>
+	
+	<!--Js-->
 	<script type="text/javascript" src="js/renderChart.js"></script>
-	<script type = "text/javascript" src="js/jquery-3.2.1.min.js"></script>
-   	<script type = "text/javascript" src="js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="js/uploadCsv.js"></script>
+
 </body>
 </html>
