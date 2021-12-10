@@ -1,28 +1,46 @@
 const { data } = require("jquery");
 
-function getIQ(){
-    let file = $('#dataFile').prop('files')[0];
-    // File Checking
-    // Check if it's the correct filetyp
+function sendData(){
+    // File handling
+    let data = $('#dataFile').prop('files')[0];
+    let check = "";
 
-    // Actual file processing    
-    file.text().then(text => {
-        let data = $.csv.toArrays(text);
-        console.log(data);
+    // Check filetype
+    check = checkFile(data);
+    if (check != ""){
+        console.error(check);
+        return false;
+    }
+
+    data.text().then(text => {
+        // Process into to IQ data
+        processFile(data);
     }).catch(err => {
         console.error(err);
     })
+
     return false;
-    
-    // Do some CSV voodoo magic here
 }
 
-function sendData(){
-    console.log("Sent")
+function checkFile(file){
+    let check = "";
+    let errMsg = "Invalid file!"
+    try{
+        let name = file.name;
+        name = name.split('.')[1];
+    } catch{
+       return errMsg
+    }
+    if (file.type != "application/vnd.ms-excel"){
+        check = errMsg;
+    } else if(file.type != "text/plain" && name != "csv"){
+        check = errMsg;
+    }
+
+    return check;
 }
 
-$(document).ready(function(){
-    $("#submitFile").click(function(){
-        sendData();
-    })
-})
+function processFile(data){
+    //turn into a nice array
+    console.log("processFile")
+};
