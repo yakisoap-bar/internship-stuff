@@ -6,21 +6,26 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 	<link rel="stylesheet" href="css/bootstrap.min.css">
-	<link rel="stylesheet" href="css/styles.css">
-	<link href="css/bootstrap-theme.css" rel="stylesheet" />
+	<link href="css/bootstrap-theme.min.css" rel="stylesheet" />
 	<title>Analysis</title>
 
 </head>
 <body>
 	<div class="jumbotron text-center bg-dark text-white box">
 		<br>
-		<h1>Upload</h1>
+		<h1>Live Analysis</h1>
 		<br>
+			<input type="file" id="dataFile" onchange="getIQ()" name="filename" class="btn btn-light">
+			<br>
+			<!--
+			<button type="submit" id="submitFile" class="btn btn-success">Upload</button>
 		<form action="">
 			<input type="file" id="dataFile" name="filename">
 			<br>
-			<button type="submit" id="submitFile" class="btn btn-success">Upload</button>
+			<button type="submit" id="submitFile" class="btn btn-s class="btn btn-"uccess">Upload</button>
 		</form>
+
+			-->
 		<br>
 	</div>
 
@@ -32,8 +37,8 @@
 	</div>
 
 	<!--Libraries-->
-	<script src="jquery.js"></script>
-	<script src="chart.js"></script>
+	<script src="jquery.min.js"></script>
+	<script src="chart.min.js"></script>
 	
 	<!--Js-->
 	<script type="text/javascript" src="js/renderChart.js"></script>
