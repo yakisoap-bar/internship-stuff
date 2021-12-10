@@ -1,23 +1,20 @@
-const { data } = require("jquery");
-
 function sendData(){
     // File handling
-    let data = $('#dataFile').prop('files')[0];
+    let csvRaw = $('#dataFile').prop('files')[0];
     let check = "";
 
     // Check filetype
-    check = checkFile(data);
+    check = checkFile(csvRaw);
     if (check != ""){
         console.error(check);
         return false;
     }
 
-    data.text().then(text => {
-        // Process into to IQ data
-        processFile(data);
-    }).catch(err => {
-        console.error(err);
+    csvRaw.text().then(text => {;
+        let data = text;
+        processFile(text);
     })
+
 
     return false;
 }
@@ -25,11 +22,11 @@ function sendData(){
 function checkFile(file){
     let check = "";
     let errMsg = "Invalid file!"
+    let name = file.name;
     try{
-        let name = file.name;
         name = name.split('.')[1];
-    } catch{
-       return errMsg
+    } catch(e){
+       return e;
     }
     if (file.type != "application/vnd.ms-excel"){
         check = errMsg;
@@ -40,7 +37,25 @@ function checkFile(file){
     return check;
 }
 
-function processFile(data){
-    //turn into a nice array
-    console.log("processFile")
-};
+function processFile(file){
+    let data = file;
+
+    // turn into nice array
+    // [[I,Q],[I,Q]...]
+    data = data.split('\n')
+    for(let i=0; i<data.length; i++){
+        data[i] = data[i].split(',');
+        
+        // Convert to floats
+        data[i][0] = parseFloat(data[i][0])
+        data[i][1] = parseFloat(data[i][1])
+
+        if (Number.isNaN(data[i][0]) || Number.isNaN(data[i][0])){
+            data.splice(i, 1);
+        } else{
+            data[i] = [[data[i][0]*1024], [data[i][1]*1024]];
+        };
+    }
+
+    console.log(data)
+}
