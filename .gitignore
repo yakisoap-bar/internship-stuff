@@ -5,3 +5,4 @@
 .idea
 .replit
 node_modules
+__pycache__
