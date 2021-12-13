@@ -52,6 +52,8 @@ def search_connect():
         err_check(rsa.DEVICE_Connect(deviceIDs[selection]))
     rsa.CONFIG_Preset()
 
+    return deviceIDs[0]
+
 def config_block_iq(cf=1e9, refLevel=0, iqBw=40e6, recordLength=10e3):
     '''
     Configure IQ collection parameters for the connected Spectrum Analyser.
