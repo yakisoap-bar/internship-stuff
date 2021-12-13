@@ -15,7 +15,6 @@ function sendData(){
         processFile(text);
     })
 
-
     return false;
 }
 

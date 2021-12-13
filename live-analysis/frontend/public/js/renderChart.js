@@ -1,5 +1,27 @@
 const ctx = document.getElementById('myChart');
 
+function getData(recv){
+   // Data shld alr be sorted
+   let results = {
+       "labels": recv[1],
+       "data": recv[0],
+   }
+
+   // Turn into float
+   results.data = convertToFloat(results.data);
+
+   return results;
+}
+
+function convertToFloat(data){
+   for(let i=0; i<data.length; i++){
+       data[i] = parseFloat(data[i]);
+   };
+   return data;
+}
+
+let results = getData([[19, 12, 5, 3, 3, 2], ['BNET', 'Wifi', 'FASTNET', 'Bluetooth', 'FM', '4G']]);
+
 // Need to find a way to generate the colours better
 let deco = {
     bgCol: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)', 'rgba(75, 192, 192, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(255, 159, 64, 0.2)'],
@@ -19,10 +41,10 @@ let options = {
 
 // Data
 let records = {
-    labels: ['Wifi', 'BNET', 'FASTNET', 'Bluetooth', '4G', 'FM'],
+    labels: results.labels,
     datasets:[{
         label: 'No. of records',
-        data: [12, 19, 3, 5, 2, 3],
+        data: results.data,
         backgroundColor: deco.bgCol,
         borderColor: deco.borderCol,
         borderWidth: deco.borderWidth
