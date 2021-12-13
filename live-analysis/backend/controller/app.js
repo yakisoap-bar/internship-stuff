@@ -49,7 +49,8 @@ app.post('/predict', (req, res) => {
     }).then(response => {
         // return correct results
         predictions = response.data.predictions;
-        predictions = math.mean(predictions)
+        console.log(predictions);
+        predictions = math.mean(predictions, 0)
 
         // load signal names from file
         var signalNames = require('./signalNames.json');
