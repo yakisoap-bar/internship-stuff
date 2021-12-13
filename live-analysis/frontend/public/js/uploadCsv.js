@@ -14,12 +14,12 @@ function sendData(){
 
     csvRaw.text().then(text => {;
         let data = processFile(text);
+
         axios.post(DOMAIN, {
             "data": data
         }).then(function(results){
-            getData(results);
             let ctx = document.getElementById('myChart');
-            const myChart = new Chart(ctx, chartData);
+            const myChart = new Chart(ctx, chartData(results));
         })
     })
 

@@ -1,15 +1,13 @@
-
-function getData(recv){
+function formatData(recv){
    // Data shld alr be sorted
-   let results = {
-       "labels": recv[1],
+   let formattedData = {
        "data": recv[0],
+       "labels": recv[1]
    }
 
-   // Turn into float
-   results.data = convertToFloat(results.data);
+   formattedData.data = convertToFloat(formattedData.data);
 
-   return results;
+   return formattedData;
 }
 
 function convertToFloat(data){
@@ -18,8 +16,6 @@ function convertToFloat(data){
    };
    return data;
 }
-
-let results = getData([[19, 12, 5, 3, 3, 2], ['BNET', 'Wifi', 'FASTNET', 'Bluetooth', 'FM', '4G']]);
 
 function chartData(results){
     // Need to find a way to generate the colours better
