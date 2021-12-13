@@ -1,3 +1,5 @@
+const DOMAIN = 'http://localhost:3000/predict'
+
 function sendData(){
     // File handling
     let csvRaw = $('#dataFile').prop('files')[0];
@@ -11,8 +13,14 @@ function sendData(){
     }
 
     csvRaw.text().then(text => {;
-        let data = text;
-        processFile(text);
+        let data = processFile(text);
+        axios.post(DOMAIN, {
+            "data": data
+        }).then(function(results){
+            getData(results);
+            let ctx = document.getElementById('myChart');
+            const myChart = new Chart(ctx, chartData);
+        })
     })
 
     return false;
@@ -56,5 +64,5 @@ function processFile(file){
         };
     }
 
-    console.log(data)
+    return data;
 }
