@@ -9,7 +9,7 @@ const math = require('mathjs');
 const app = express();
 
 // set up stuff
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit : '200mb'}));
 app.options('*', cors());
 app.use(cors());
 
@@ -49,7 +49,6 @@ app.post('/predict', (req, res) => {
     }).then(response => {
         // return correct results
         predictions = response.data.predictions;
-        console.log(predictions);
         predictions = math.mean(predictions, 0)
 
         // load signal names from file
