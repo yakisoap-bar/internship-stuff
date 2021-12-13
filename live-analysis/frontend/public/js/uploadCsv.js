@@ -1,4 +1,4 @@
-const DOMAIN = 'http://localhost:3000/predict'
+const URL = 'http://localhost:3000/predict';
 
 function sendData(){
     // File handling
@@ -15,11 +15,17 @@ function sendData(){
     csvRaw.text().then(text => {;
         let data = processFile(text);
 
-        axios.post(DOMAIN, {
+        axios.post(URL, {
             "data": data
-        }).then(function(results){
-            let ctx = document.getElementById('myChart');
+        },
+        {
+            "headers": { 
+                'Content-Type': 'application/json'
+        }
+    }).then(function(results){
             const myChart = new Chart(ctx, chartData(results));
+        }).catch(error => {
+            console.log(error);
         })
     })
 
@@ -59,6 +65,7 @@ function processFile(file){
 
         if (Number.isNaN(data[i][0]) || Number.isNaN(data[i][0])){
             data.splice(i, 1);
+            i--;
         } else{
             data[i] = [[data[i][0]*1024], [data[i][1]*1024]];
         };

@@ -1,3 +1,5 @@
+let ctx = document.getElementById('myChart');
+
 function formatData(recv){
    // Data shld alr be sorted
    let formattedData = {
