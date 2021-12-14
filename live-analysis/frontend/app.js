@@ -11,6 +11,7 @@ app.use(express.static('node_modules/bootstrap/dist'));
 app.use(express.static('node_modules/jquery/dist'));
 app.use(express.static('node_modules/chart.js/dist'));
 app.use(express.static('node_modules/axios/dist'));
+app.use(express.static('node_modules/mathjs/lib/browser'));
 
 // Start server on port
 const PORT = process.env.PORT;
