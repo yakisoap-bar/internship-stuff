@@ -3,8 +3,8 @@ let ctx = document.getElementById('myChart');
 function formatData(recv){
    // Data shld alr be sorted
    let formattedData = {
-       "data": recv[0],
-       "labels": recv[1]
+       "data": recv.data.predictions,
+       "labels": recv.data.signalNames
    }
 
    formattedData.data = convertToFloat(formattedData.data);
@@ -33,7 +33,7 @@ function chartData(results){
         scales: {
             y: {
                 beginAtZero: true
-            }
+            },
         }
     };
 
