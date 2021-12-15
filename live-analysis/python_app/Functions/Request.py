@@ -9,7 +9,8 @@ def predict_post(url, data):
     url: URL to send post request to
     data: prediction arrays to send to `url`
 
-    Returns a list containing the returned status code and json body from server: `[status, <json>]`.
+    Returns a list containing the returned status code 
+    and json body from server: `[status, <json>]`.
     '''
     # put data into dict for sending to server
     body = {'data' : data}

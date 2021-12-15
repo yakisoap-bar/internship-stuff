@@ -11,7 +11,7 @@ def err_check(rs):
     if ReturnStatus(rs) != ReturnStatus.noError:
         raise RSAError(ReturnStatus(rs).name)
 
-def search_connect():
+def device_connect():
     numFound = c_int(0)
     intArray = c_int * DEVSRCH_MAX_NUM_DEVICES
     deviceIDs = intArray()
@@ -20,39 +20,35 @@ def search_connect():
     apiVersion = create_string_buffer(DEVINFO_MAX_STRLEN)
 
     rsa.DEVICE_GetAPIVersion(apiVersion)
-    print('API Version {}'.format(apiVersion.value.decode()))
+
+    output = {
+            'message' : None,
+            'api_version' : apiVersion.value.decode(),
+            'device_type' : None,
+            'device_serial' : None
+        }
 
     err_check(rsa.DEVICE_Search(byref(numFound), deviceIDs,
                                 deviceSerial, deviceType))
 
     if numFound.value < 1:
         # rsa.DEVICE_Reset(c_int(0))
-        print('No instruments found. Exiting script.')
-        exit()
+        output['message'] = 'No Device Found.'
+
     elif numFound.value == 1:
-        print('One device found.')
-        print('Device type: {}'.format(deviceType.value.decode()))
-        print('Device serial number: {}'.format(deviceSerial.value.decode()))
+        output['device_type'] = deviceType.value.decode()
+        output['device_serial'] = deviceSerial.value.decode()
+
         err_check(rsa.DEVICE_Connect(deviceIDs[0]))
+        rsa.CONFIG_Preset()
+        rsa.DEVICE_PrepareForRun()
+
+        output['message'] = 'Connection Success.'
     else:
         # corner case
-        print('2 or more instruments found. Enumerating instruments, please wait.')
-        for inst in deviceIDs:
-            rsa.DEVICE_Connect(inst)
-            rsa.DEVICE_GetSerialNumber(deviceSerial)
-            rsa.DEVICE_GetNomenclature(deviceType)
-            print('Device {}'.format(inst))
-            print('Device Type: {}'.format(deviceType.value))
-            print('Device serial number: {}'.format(deviceSerial.value))
-            rsa.DEVICE_Disconnect()
-        # note: the API can only currently access one at a time
-        selection = 1024
-        while (selection > numFound.value - 1) or (selection < 0):
-            selection = int(input('Select device between 0 and {}\n> '.format(numFound.value - 1)))
-        err_check(rsa.DEVICE_Connect(deviceIDs[selection]))
-    rsa.CONFIG_Preset()
+        output['message'] = 'Too Many Devices Connected.'
 
-    return deviceIDs[0]
+    return output
 
 def config_block_iq(cf=1e9, refLevel=0, iqBw=40e6, recordLength=10e3):
     '''
@@ -109,4 +105,4 @@ def acquire_block_iq(recordLength=10e3, n_records=1):
         
     rsa.DEVICE_Stop()
 
-    return np.array(collected_data)
+    return np.array(collected_data).tolist()
