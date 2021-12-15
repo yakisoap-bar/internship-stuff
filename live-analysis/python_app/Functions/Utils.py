@@ -1,0 +1,2 @@
+def checkArguments():
+	if args.
