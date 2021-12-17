@@ -1,13 +1,31 @@
 let ctx = document.getElementById('myChart');
 
 function formatData(recv){
-   // Data shld alr be sorted
-   let formattedData = {
-       "data": recv.data.predictions,
-       "labels": recv.data.signalNames
+    // Data shld alr be sorted
+    // This was a misconception, mission abort
+    let predictions = recv.data.predictions;
+    let signalNames = recv.data.signalNames;
+    let lenNum = signalNames.length;
+
+   // Sort
+   let temp = []
+   for(let i=0; i<lenNum; i++){
+       temp[i] = [convertToFloat(predictions[i]), signalNames[i]] 
    }
 
-   formattedData.data = convertToFloat(formattedData.data);
+   temp.sort()
+   temp.reverse()
+
+    let formattedData = {
+       "data": [],
+       "labels": []
+   }
+
+   for (i=0; i<lenNum; i++){
+       formattedData.data[i] = temp[i][0];
+       formattedData.labels[i] = temp[i][1];
+   }
+
 
    return formattedData;
 }

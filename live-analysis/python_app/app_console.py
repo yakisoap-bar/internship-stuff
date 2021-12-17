@@ -5,6 +5,14 @@ from Functions.Collect import *
 from Functions.Request import *
 from Functions.Status import *
 
+def checkArgs(args):
+	if args.configFile:
+		pass
+		return True
+
+	else:
+		return False
+
 # program
 def doStuff(args):
 	config_block_iq(args.centerFreq, args.refLevel, args.bandwidth, 1024)
@@ -41,16 +49,26 @@ def main():
 						help="Determine number of records")
 	parser.add_argument('-s', '--samplingfrequency',
 						dest="samplingFrequency", metavar="samplingFrequency",
-						nargs='?', default=10, type=int,
-						help="Determine number of records")
+						nargs='?', default=40, type=int,
+						help="Set sampling frequency")
+	parser.add_argument('--file',
+						dest="configFile", metavar="configFile",
+						nargs='?', type=str,
+						help="Specify configuration file.")
 
 	args = parser.parse_args()
 
 	device_connect()
+
+	# Check parsed arguments
 	if args.battery:
 		print(getBatteryStatus())
-	else:
+		exit()
+	
+	if checkArgs():
 		doStuff(args)
+	
+	exit()
 
 if __name__ == '__main__':
 	main()
