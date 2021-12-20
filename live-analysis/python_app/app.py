@@ -1,27 +1,32 @@
-from kivy.app import App
-from k
+import sys, random
+from PySide6 import QtCore, QtWidgets, QtGui
 
-# Libraries
-from Functions.Collect import *
-from Functions.Request import *
-from Functions.Status import *
+class Widget(QtWidgets.QWidget):
+	def __init__(self) -> None:
+		super().__init__()
 
-# program
-def doStuff(args):
-	config_block_iq(args.centerFreq, args.refLevel, args.bandwidth, 1024)
+		self.hello = ["End", "Me", "Plz"]
 
-	while True:
-		data = acquire_block_iq(1024, args.numRecords)
-		predictions = predict_post('http://localhost:3000/predict', data)
-		print(predictions)
-		# print([predictions["signalNames"], predictions["predictions"]])
+		self.button = QtWidgets.QPushButton("PUSH BUTTON")
+		self.text = QtWidgets.QLabel("End me",
+									alignment=QtCore.Qt.AlignCenter)
+		
+		self.layout = QtWidgets.QVBoxLayout(self)
+		self.layout.addWidget(self.text)
+		self.layout.addWidget(self.button)
 
-def main():
-	device_connect()
-	if args.battery:
-		print(getBatteryStatus())
-	else:
-		doStuff(args)
+		self.button.clicked.connect(self.magic)
 
-if __name__ == '__main__':
-	main()
+	
+	@QtCore.Slot()
+	def magic(self):
+		self.text.setText(random.choice(self.hello))
+
+if __name__ == "__main__":
+	app = QtWidgets.QApplication([])
+
+	widget = Widget()
+	widget.resize(800,600)
+	widget.show()
+
+	sys.exit(app.exec())
