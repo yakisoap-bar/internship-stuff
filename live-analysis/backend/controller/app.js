@@ -41,7 +41,7 @@ app.post('/predict', (req, res) => {
     records = math.reshape(records, shape);
 
     // send record for prediction
-    var address = 'http://localhost:8501/v1/models/resnet:predict';
+    var address = 'http://localhost:8501/v1/models/serving_model:predict';
 
     axios.post(address, {
         "signature_name": "serving_default", 
