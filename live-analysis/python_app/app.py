@@ -33,7 +33,8 @@ class Window(QtWidgets.QMainWindow):
 
 	def buttons(self):
 		# Stick all buttons here
-		self.quitButton()
+		# self.quitButton()
+		self.btnRunAnalysis()
 
 	def getScreenRes(self):
 		screen = QtWidgets.QApplication.primaryScreen()
@@ -56,37 +57,37 @@ class Window(QtWidgets.QMainWindow):
 		if window_title == 'Running...':
 			self.quit_btn.setDisabled(True)
 
-	def quitButton(self):
+	def btnQuit(self):
 		self.quit_btn = QtWidgets.QPushButton("Quit", self)
 		self.quit_btn.setCheckable(True)
 		self.quit_btn.clicked.connect(QtCore.QCoreApplication.instance().quit)
 
-	def runAnalysisBtn(self):
+	def btnRunAnalysis(self):
 		# btn.clicked.connect(QtCore.QCoreApplication.instance().quit)
-		self.run_analysis_btn = QtWidgets.QPushButton("Run", self)
-		self.run_analysis_btn.setCheckable(True)
-		self.run_analysis_btn.clicked.connect(self.runAnalysisChecked)
+		self.btn_run_analysis = QtWidgets.QPushButton("Run", self)
+		self.btn_run_analysis.setCheckable(True)
+		self.btn_run_analysis.clicked.connect(self.runAnalysisChecked)
 
 	def connectSA(self):
 		if self.check_set_config_iq == False:
 			config_block_iq(self.center_freq, self.ref_level, self.bandwidth, 1024)
 			self.check_set_config_iq = True
 
-	def runAnalysisBtnPressed(self, checked):
-		self.run_analysis_btn_check = checked
-		if self.run_analysis_btn_check:
-			self.run_analysis_btn.setText("Stop")
+	def btnRunAnalysisPressed(self, checked):
+		self.btn_run_analysis_check = checked
+		if self.btn_run_analysis_check:
+			self.btn_run_analysis.setText("Stop")
 			self.windowStatus("Running analysis...")
 		else:
-			self.run_analysis_btn.setText("Run")
+			self.btn_run_analysis.setText("Run")
 			self.windowStatus("Running analysis...")
 	
-	def runAnalysis(self):
+	def startAnalysis(self):
 		if self.check_set_config_iq == False:
 			self.connectSA()
 		
-		# While run_analysis_btn is toggled to True
-		while self.run_analysis_btn_check:
+		# While btn_run_analysis is toggled to True
+		while self.btn_run_analysis_check:
 			data = acquire_block_iq(1024, self.num_records)
 			predictions = predict_post('http://localhost:3000/predict', data)
 			print(predictions)
