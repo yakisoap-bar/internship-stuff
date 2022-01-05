@@ -60,6 +60,10 @@ class Window(QtWidgets.QMainWindow):
 		screen = QtWidgets.QApplication.primaryScreen()
 		screen = screen.availableGeometry()
 		return screen
+	
+	def menuToolbar(self):
+		self.menu_toolbar = self.menuBar()
+		self.file_menu = self.menu_toolbar.addMenu('&File')
 
 	def contextMenuEvent(self, e):
 		context = QtWidgets.QMenu(self)
