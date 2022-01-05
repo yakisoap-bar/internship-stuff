@@ -1,10 +1,22 @@
 from API.RSA_API import *
 from ctypes import *
+from platform import system
 
 import numpy as np
 
 # load dll
-rsa = cdll.LoadLibrary('./API/win/RSA_API.dll')
+CURRENT_OS = system()
+
+if CURRENT_OS == 'Windows':
+    rsa = cdll.LoadLibrary('./API/win/RSA_API.dll')
+elif CURRENT_OS == 'Linux':
+    RTLD_LAZY = 0x0001
+    LAZYLOAD = RTLD_LAZY | RTLD_GLOBAL
+    rsa = CDLL('./API/linux/libRSA_API.so', LAZYLOAD)
+    usbapi = CDLL("./API/linux/libcyusb_shared.so",LAZYLOAD)
+else:
+    print('OS not supported!')
+    exit()
 
 # functions
 def err_check(rs):
