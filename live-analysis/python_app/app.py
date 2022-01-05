@@ -9,6 +9,22 @@ from Functions.Status import *
 class Window(QtWidgets.QMainWindow):
 	def __init__(self) -> None:
 		super().__init__()
+		# Declare global vars here
+		self.check_set_config_iq = False		
+		self.mainLayout = QtWidgets.QVBoxLayout()
+		# self.configLayout = QtWidgets.QV
+
+		self.multipliers = {
+			"khz": 1000,
+			"mhz": 10000,
+			"ghz": 100000
+		}
+
+		# Default analyzing params
+		self.num_records = 10
+		self.center_freq = 2.44e9
+		self.ref_level = 0
+		self.bandwidth = 40e6
 
 		self.configs()
 		self.buttons()
@@ -17,21 +33,6 @@ class Window(QtWidgets.QMainWindow):
 	
 	@QtCore.Slot()
 	def configs(self):
-		# Declare global vars here
-		self.check_set_config_iq = False		
-		self.mainLayout = QtWidgets.QVBoxLayout()
-		self.configLayout = QtWidgets.QHBoxLayout()
-		self.multipliers = {
-			"khz": 100,
-			"mhz": 1000,
-			"ghz": 10000
-		}
-		# Defaults
-		self.num_records = 10
-		self.center_freq = 2.44e9
-		self.ref_level = 0
-		self.bandwidth = 40e6
-
 		# App config things
 		screen_size = self.getScreenRes()
 		# self.setGeometry(0, 0, 500, 300)
@@ -55,6 +56,24 @@ class Window(QtWidgets.QMainWindow):
 		self.configRefLvl()
 		self.configSamplingFreq()
 		self.btnQuit()
+
+		self.config_buttons = [
+			self.center_freq_label,
+			self.center_freq_input,
+			self.center_freq_dropdown,
+			self.bandwidth_label,
+			self.bandwidth_input,
+			self.bandwidth_dropdown,
+			self.ref_lvl_label,
+			self.ref_lvl_input,
+			self.ref_lvl_slider,
+			self.sampling_freq_label,
+			self.sampling_freq_input,
+		]
+		# All the config buttons are a pain
+		for button in self.config_buttons:
+			self.mainLayout.addWidget(button)
+			button.hide()
 	
 	def getScreenRes(self):
 		screen = QtWidgets.QApplication.primaryScreen()
@@ -93,28 +112,15 @@ class Window(QtWidgets.QMainWindow):
 		self.show_configs_btn.clicked.connect(self.btnShowConfigsPressed)
 	
 	def btnShowConfigsPressed(self, checked):
-		config_buttons = [
-			self.center_freq_label,
-			self.center_freq_input,
-			self.center_freq_dropdown,
-			self.bandwidth_label,
-			self.bandwidth_input,
-			self.bandwidth_dropdown,
-			self.ref_lvl_label,
-			self.ref_lvl_input,
-			self.ref_lvl_slider,
-			self.sampling_freq_label,
-			self.sampling_freq_input,
-		]
 
 		if checked:
 			# Add all the btns to layout
-			for button in config_buttons:
-				self.mainLayout.addWidget(button)
+			for button in self.config_buttons:
+				button.show()
 		else:
 			# Remove from layout
-			for button in config_buttons:
-				self.mainLayout.removeWidget(button)
+			for button in self.config_buttons:
+				button.hide()
 
 	def configBandwidth(self):
 		self.bandwidth_label = QtWidgets.QLabel("Bandwidth")
