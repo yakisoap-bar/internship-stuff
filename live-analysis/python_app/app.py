@@ -19,7 +19,8 @@ class Window(QtWidgets.QMainWindow):
 	def configs(self):
 		# Declare global vars here
 		self.check_set_config_iq = False		
-		self.layout = QtWidgets.QVBoxLayout()
+		self.mainLayout = QtWidgets.QVBoxLayout()
+		self.configLayout = QtWidgets.QHBoxLayout()
 		self.multipliers = {
 			"khz": 100,
 			"mhz": 1000,
@@ -40,8 +41,9 @@ class Window(QtWidgets.QMainWindow):
 		self.setWindowIcon(QtGui.QIcon('./img/icon.png'))
 	
 	def appLayout(self):
+		self.menuToolbar()
 		container = QtWidgets.QWidget()
-		container.setLayout(self.layout)
+		container.setLayout(self.mainLayout)
 		self.setCentralWidget(container)
 
 	def buttons(self):
@@ -51,6 +53,7 @@ class Window(QtWidgets.QMainWindow):
 		self.configCenterFreq()
 		self.configBandwidth()
 		self.configRefLvl()
+		self.configSamplingFreq()
 		self.btnQuit()
 	
 	def getScreenRes(self):
@@ -75,13 +78,13 @@ class Window(QtWidgets.QMainWindow):
 
 	def btnQuit(self):
 		self.quit_btn = QtWidgets.QPushButton("Quit", self)
-		self.layout.addWidget(self.quit_btn)
+		self.mainLayout.addWidget(self.quit_btn)
 		self.quit_btn.setCheckable(True)
 		self.quit_btn.clicked.connect(QtCore.QCoreApplication.instance().quit)
 	
 	def btnShowConfigs(self):
 		self.show_configs_btn = QtWidgets.QPushButton("Configure", self)
-		self.layout.addWidget(self.show_configs_btn)
+		self.mainLayout.addWidget(self.show_configs_btn)
 		self.show_configs_btn.setCheckable(True)
 		self.show_configs_btn.clicked.connect(self.btnShowConfigsPressed)
 	
@@ -96,16 +99,18 @@ class Window(QtWidgets.QMainWindow):
 			self.ref_lvl_label,
 			self.ref_lvl_input,
 			self.ref_lvl_slider,
+			self.sampling_freq_label,
+			self.sampling_freq_input,
 		]
 
 		if checked:
 			# Add all the btns to layout
 			for button in config_buttons:
-				self.layout.addWidget(button)
+				self.mainLayout.addWidget(button)
 		else:
 			# Remove from layout
 			for button in config_buttons:
-				self.layout.removeWidget(button)
+				self.mainLayout.removeWidget(button)
 
 	def configBandwidth(self):
 		self.bandwidth_label = QtWidgets.QLabel("Bandwidth")
@@ -129,8 +134,12 @@ class Window(QtWidgets.QMainWindow):
 	def configCenterFreqMultiplier(self, multiplier):
 		self.cfMultiplier = self.multipliers[multiplier]
 
+	def configSamplingFreq(self):
+		self.sampling_freq_label = QtWidgets.QLabel("Sampling Frequency")
+		self.sampling_freq_input = QtWidgets.QLineEdit()
+
 	def configRefLvl(self):
-		self.ref_lvl_label = QtWidgets.QLabel("Record Length")
+		self.ref_lvl_label = QtWidgets.QLabel("Reference Level")
 		self.ref_lvl_input = QtWidgets.QLineEdit()
 
 		self.ref_lvl_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
@@ -141,12 +150,10 @@ class Window(QtWidgets.QMainWindow):
 	
 	def configRefLvlSliderVal(self, value):
 		self.ref_level = value
-		print(self.ref_level)
 		
 	def btnRunAnalysis(self):
-		# btn.clicked.connect(QtCore.QCoreApplication.instance().quit)
 		self.run_analysis_btn = QtWidgets.QPushButton("Run", self)
-		self.layout.addWidget(self.run_analysis_btn)
+		self.mainLayout.addWidget(self.run_analysis_btn)
 		self.run_analysis_btn.setCheckable(True)
 		self.run_analysis_btn.clicked.connect(self.btnRunAnalysisPressed)
 
