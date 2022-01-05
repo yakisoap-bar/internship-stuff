@@ -14,13 +14,15 @@ def checkArgs(args):
 		return False
 
 # program
-def doStuff(args):
-	config_block_iq(args.centerFreq, args.refLevel, args.bandwidth, 1024)
+def doStuff():
+	# config_block_iq(args.centerFreq, args.refLevel, args.bandwidth, 1024)
+	config_block_iq(2.44e9, 0, 40e6, 1024)
 
 	while True:
-		data = acquire_block_iq(1024, args.numRecords)
+		data = acquire_block_iq(1024, 10)
 		predictions = predict_post('http://localhost:3000/predict', data)
 		print(predictions)
+
 		# print([predictions["signalNames"], predictions["predictions"]])
 
 def main():
@@ -56,17 +58,18 @@ def main():
 						nargs='?', type=str,
 						help="Specify configuration file.")
 
-	args = parser.parse_args()
+	# args = parser.parse_args()
 
 	device_connect()
+	doStuff()
 
-	# Check parsed arguments
-	if args.battery:
-		print(getBatteryStatus())
-		exit()
+	# # Check parsed arguments
+	# if args.battery:
+	# 	print(getBatteryStatus())
+	# 	exit()
 	
-	if checkArgs():
-		doStuff(args)
+	# if checkArgs():
+	# 	doStuff(args)
 	
 	exit()
 
