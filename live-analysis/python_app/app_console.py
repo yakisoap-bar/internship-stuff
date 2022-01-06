@@ -62,6 +62,7 @@ def main():
 
 	device_connect()
 	doStuff()
+	# print(getBatteryStatus())
 
 	# # Check parsed arguments
 	# if args.battery:

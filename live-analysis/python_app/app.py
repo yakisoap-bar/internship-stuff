@@ -6,13 +6,15 @@ from Functions.Collect import *
 from Functions.Request import *
 from Functions.Status import *
 
-class Window(QtWidgets.QMainWindow):
+class mainWindow(QtWidgets.QMainWindow):
 	def __init__(self) -> None:
 		super().__init__()
 		# Declare global vars here
 		self.check_set_config_iq = False		
-		self.mainLayout = QtWidgets.QVBoxLayout()
-		# self.configLayout = QtWidgets.QV
+		self.mainLayout = QtWidgets.QGridLayout
+		self.sideBarLayout = QtWidgets.QVBoxLayout()
+		self.configLayout = QtWidgets.QVBoxLayout()
+		self.run_analysis_btn_check = False
 
 		self.multipliers = {
 			"khz": 1000,
@@ -30,12 +32,11 @@ class Window(QtWidgets.QMainWindow):
 		self.buttons()
 		self.appLayout()
 		self.show()
+		self.startAnalysis()
 	
 	@QtCore.Slot()
 	def configs(self):
 		# App config things
-		screen_size = self.getScreenRes()
-		# self.setGeometry(0, 0, 500, 300)
 		# self.setGeometry(0, 0, screen_size.width(), screen_size.height())
 		self.window_title = "Live Classification"
 		self.setWindowTitle(self.window_title)
@@ -43,9 +44,11 @@ class Window(QtWidgets.QMainWindow):
 	
 	def appLayout(self):
 		self.menuToolbar()
-		container = QtWidgets.QWidget()
-		container.setLayout(self.mainLayout)
-		self.setCentralWidget(container)
+		self.sideBarLayout.addLayout(self.configLayout)
+
+		self.container = QtWidgets.QWidget()
+		self.container.setLayout(self.sideBarLayout)
+		self.setCentralWidget(self.container)
 
 	def buttons(self):
 		# Stick all buttons here
@@ -55,7 +58,6 @@ class Window(QtWidgets.QMainWindow):
 		self.configBandwidth()
 		self.configRefLvl()
 		self.configSamplingFreq()
-		self.btnQuit()
 
 		self.config_buttons = [
 			self.center_freq_label,
@@ -72,7 +74,7 @@ class Window(QtWidgets.QMainWindow):
 		]
 		# All the config buttons are a pain
 		for button in self.config_buttons:
-			self.mainLayout.addWidget(button)
+			self.configLayout.addWidget(button)
 			button.hide()
 	
 	def getScreenRes(self):
@@ -90,24 +92,10 @@ class Window(QtWidgets.QMainWindow):
 		context.addAction(QtGui.QAction("Test 2", self))
 		context.addAction(QtGui.QAction("Test 3", self))
 		context.exec_(e.globalPos())
-
-	def windowStatus(self, new_title):
-		# can use this to show "Running..." or something
-		self.setWindowTitle(new_title)
-	
-	def windowTitle(self, window_title):
-		if window_title == 'Running...':
-			self.quit_btn.setDisabled(True)
-
-	def btnQuit(self):
-		self.quit_btn = QtWidgets.QPushButton("Quit", self)
-		self.mainLayout.addWidget(self.quit_btn)
-		self.quit_btn.setCheckable(True)
-		self.quit_btn.clicked.connect(QtCore.QCoreApplication.instance().quit)
 	
 	def btnShowConfigs(self):
 		self.show_configs_btn = QtWidgets.QPushButton("Configure", self)
-		self.mainLayout.addWidget(self.show_configs_btn)
+		self.sideBarLayout.addWidget(self.show_configs_btn)
 		self.show_configs_btn.setCheckable(True)
 		self.show_configs_btn.clicked.connect(self.btnShowConfigsPressed)
 	
@@ -121,6 +109,7 @@ class Window(QtWidgets.QMainWindow):
 			# Remove from layout
 			for button in self.config_buttons:
 				button.hide()
+			self.resize(QtCore.QSize.minimumSizeHint())
 
 	def configBandwidth(self):
 		self.bandwidth_label = QtWidgets.QLabel("Bandwidth")
@@ -163,29 +152,35 @@ class Window(QtWidgets.QMainWindow):
 		
 	def btnRunAnalysis(self):
 		self.run_analysis_btn = QtWidgets.QPushButton("Run", self)
-		self.mainLayout.addWidget(self.run_analysis_btn)
+		self.sideBarLayout.addWidget(self.run_analysis_btn)
 		self.run_analysis_btn.setCheckable(True)
 		self.run_analysis_btn.clicked.connect(self.btnRunAnalysisPressed)
 
 	def connectSA(self):
 		if self.check_set_config_iq == False:
-			config_block_iq(self.center_freq, self.ref_level, self.bandwidth, 1024)
+			device_connect()
 			self.check_set_config_iq = True
 
 	def btnRunAnalysisPressed(self, checked):
 		self.run_analysis_btn_check = checked
 		if self.run_analysis_btn_check:
 			self.run_analysis_btn.setText("Stop")
-			self.windowStatus(self.window_title)
+			self.setWindowTitle(self.window_title)
+			self.startAnalysis()
 		else:
-			self.connectSA()
 			self.run_analysis_btn.setText("Run")
-			self.windowStatus("Running analysis...")
+			self.setWindowTitle("Running analysis...")
+		
+	def getBatt(self):
+		self.connectSA()
+		print(getBatteryStatus())
 	
 	def startAnalysis(self):
 		# Maybe I should thread this function
 		# While run_analysis_btn is toggled to True
+		self.connectSA()
 		while self.run_analysis_btn_check:
+			config_block_iq(self.center_freq, self.ref_level, self.bandwidth, 1024)
 			data = acquire_block_iq(1024, self.num_records)
 			predictions = predict_post('http://localhost:3000/predict', data)
 			print(predictions)
@@ -194,7 +189,7 @@ class Window(QtWidgets.QMainWindow):
 # Run the application
 def main():
 	app = QtWidgets.QApplication([])
-	GUI = Window()
+	GUI = mainWindow()
 	sys.exit(app.exec())
 
 if __name__ == "__main__":
