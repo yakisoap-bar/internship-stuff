@@ -1,7 +1,8 @@
 import sys, threading
 from PySide6 import QtCore, QtWidgets, QtGui
 
-# Interacting with the SDR
+from app.thread import Worker
+
 from Functions.Collect import *
 from Functions.Request import *
 from Functions.Status import *
@@ -9,7 +10,12 @@ from Functions.Status import *
 class mainWindow(QtWidgets.QMainWindow):
 	def __init__(self) -> None:
 		super().__init__()
-		# Declare global vars here
+
+		# Threading stuff
+		self.threadpool = QtCore.QThreadPool()
+		print(f'Multithreading with {self.threadpool.maxThreadCount()} threads')
+
+		# Global vars
 		self.check_set_config_iq = False		
 		self.mainLayout = QtWidgets.QGridLayout
 		self.sideBarLayout = QtWidgets.QVBoxLayout()
@@ -23,21 +29,23 @@ class mainWindow(QtWidgets.QMainWindow):
 		}
 
 		# Default analyzing params
-		self.num_records = 10
-		self.center_freq = 2.44e9
-		self.ref_level = 0
-		self.bandwidth = 40e6
+		self.params = {
+			"num_records": 10,
+			"center_freq": 2.44e9,
+			"ref_level": 0,
+			"bandwidth": 40e6
+		}
 
 		self.configs()
 		self.buttons()
 		self.appLayout()
 		self.show()
-		self.startAnalysis()
 	
 	@QtCore.Slot()
 	def configs(self):
 		# App config things
-		# self.setGeometry(0, 0, screen_size.width(), screen_size.height())
+		screen_size = self.getScreenRes()
+		self.setGeometry(0, 0, screen_size.width(), screen_size.height())
 		self.window_title = "Live Classification"
 		self.setWindowTitle(self.window_title)
 		self.setWindowIcon(QtGui.QIcon('./img/icon.png'))
@@ -156,32 +164,35 @@ class mainWindow(QtWidgets.QMainWindow):
 		self.run_analysis_btn.setCheckable(True)
 		self.run_analysis_btn.clicked.connect(self.btnRunAnalysisPressed)
 
+	def btnRunAnalysisPressed(self, checked):
+		self.run_analysis_btn_check = checked
+		if self.run_analysis_btn_check:
+			self.run_analysis_btn.setText("Stop")
+			self.setWindowTitle("Running analysis...")
+			self.analyse = Worker(self.runAnalysis(self.params))
+			self.threadpool.start(self.analyse)
+		else:
+			self.run_analysis_btn.setText("Run")
+			self.setWindowTitle(self.window_title)
+
 	def connectSA(self):
 		if self.check_set_config_iq == False:
 			device_connect()
 			self.check_set_config_iq = True
 
-	def btnRunAnalysisPressed(self, checked):
-		self.run_analysis_btn_check = checked
-		if self.run_analysis_btn_check:
-			self.run_analysis_btn.setText("Stop")
-			self.setWindowTitle(self.window_title)
-			self.startAnalysis()
-		else:
-			self.run_analysis_btn.setText("Run")
-			self.setWindowTitle("Running analysis...")
-		
 	def getBatt(self):
 		self.connectSA()
 		print(getBatteryStatus())
 	
-	def startAnalysis(self):
-		# Maybe I should thread this function
-		# While run_analysis_btn is toggled to True
+	def updateAnalysisState(self, status):
+		self.run_analysis = status
+
+	def runAnalysis(self, params):
+		# While run_analysis is toggled to True
 		self.connectSA()
 		while self.run_analysis_btn_check:
-			config_block_iq(self.center_freq, self.ref_level, self.bandwidth, 1024)
-			data = acquire_block_iq(1024, self.num_records)
+			config_block_iq(params['center_freq'], params['ref_level'], params['bandwidth'], 1024)
+			data = acquire_block_iq(1024, self.params["num_records"])
 			predictions = predict_post('http://localhost:3000/predict', data)
 			print(predictions)
 			# print([predictions["signalNames"], predictions["predictions"]])
