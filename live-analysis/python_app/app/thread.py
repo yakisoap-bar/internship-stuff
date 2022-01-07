@@ -1,4 +1,3 @@
-import sys, traceback
 from PySide6 import QtCore
 
 class WorkerSignals(QtCore.QObject):

@@ -1,7 +1,7 @@
 import sys, threading
 from PySide6 import QtCore, QtWidgets, QtGui
 
-from app.thread import Worker
+from app.analysis import Worker
 
 from Functions.Collect import *
 from Functions.Request import *
@@ -12,26 +12,25 @@ class mainWindow(QtWidgets.QMainWindow):
 		super().__init__()
 
 		# Threading stuff
-		self.threadpool = QtCore.QThreadPool()
-		print(f'Multithreading with {self.threadpool.maxThreadCount()} threads')
+		self.thread = QtCore.QThread()
 
 		# Global vars
 		self.check_set_config_iq = False		
 		self.mainLayout = QtWidgets.QGridLayout
-		self.sideBarLayout = QtWidgets.QVBoxLayout()
+		self.sideBarLayout = QtWidgets.QVBoxLayout();
 		self.configLayout = QtWidgets.QVBoxLayout()
 		self.run_analysis_btn_check = False
 
 		self.multipliers = {
 			"khz": 1000,
-			"mhz": 10000,
-			"ghz": 100000
+			"mhz": 10001000,
+			"ghz": 10
 		}
 
 		# Default analyzing params
 		self.params = {
 			"num_records": 10,
-			"center_freq": 2.44e9,
+			"cf": 2.44e9,
 			"ref_level": 0,
 			"bandwidth": 40e6
 		}
@@ -45,7 +44,7 @@ class mainWindow(QtWidgets.QMainWindow):
 	def configs(self):
 		# App config things
 		screen_size = self.getScreenRes()
-		self.setGeometry(0, 0, screen_size.width(), screen_size.height())
+		# self.setGeometry(0, 0, screen_size.width(), screen_size.height())
 		self.window_title = "Live Classification"
 		self.setWindowTitle(self.window_title)
 		self.setWindowIcon(QtGui.QIcon('./img/icon.png'))
@@ -62,15 +61,16 @@ class mainWindow(QtWidgets.QMainWindow):
 		# Stick all buttons here
 		self.btnRunAnalysis()
 		self.btnShowConfigs()
-		self.configCenterFreq()
+		self.btnGetBatt()
+		self.configCF()
 		self.configBandwidth()
 		self.configRefLvl()
 		self.configSamplingFreq()
 
 		self.config_buttons = [
-			self.center_freq_label,
-			self.center_freq_input,
-			self.center_freq_dropdown,
+			self.cf_label,
+			self.cf_input,
+			self.cf_dropdown,
 			self.bandwidth_label,
 			self.bandwidth_input,
 			self.bandwidth_dropdown,
@@ -108,7 +108,6 @@ class mainWindow(QtWidgets.QMainWindow):
 		self.show_configs_btn.clicked.connect(self.btnShowConfigsPressed)
 	
 	def btnShowConfigsPressed(self, checked):
-
 		if checked:
 			# Add all the btns to layout
 			for button in self.config_buttons:
@@ -119,27 +118,36 @@ class mainWindow(QtWidgets.QMainWindow):
 				button.hide()
 			self.resize(QtCore.QSize.minimumSizeHint())
 
+			# Check through configs and save them to params
+
 	def configBandwidth(self):
 		self.bandwidth_label = QtWidgets.QLabel("Bandwidth")
 		self.bandwidth_input = QtWidgets.QLineEdit()
+		self.bandwidth_input.textChanged.connect(self.configBandwidthInput)
 
 		self.bandwidth_dropdown = QtWidgets.QComboBox()
 		self.bandwidth_dropdown.addItems(["khz", "mhz"])
-		self.bandwidth_dropdown.currentTextChanged.connect(self.configCenterFreqMultiplier)
+		self.bandwidth_dropdown.currentTextChanged.connect(self.configCFMultiplier)
 	
-	def configBandwidthMultiplier(self, multiplier):
+	def configBWMultiplier(self, multiplier):
 		self.bwMultiplier = self.multipliers[multiplier]
-		
-	def configCenterFreq(self):
-		self.center_freq_label = QtWidgets.QLabel("Center Frequency")
-		self.center_freq_input = QtWidgets.QLineEdit()
-
-		self.center_freq_dropdown = QtWidgets.QComboBox()
-		self.center_freq_dropdown.addItems(["mhz", "ghz"])
-		self.center_freq_dropdown.currentTextChanged.connect(self.configCenterFreqMultiplier)
 	
-	def configCenterFreqMultiplier(self, multiplier):
+	def configBandwidthInput(self, bw_input):
+		self.bw_input = bw_input
+	
+	def configCF(self):
+		self.cf_label = QtWidgets.QLabel("Center Frequency")
+		self.cf_input = QtWidgets.QLineEdit()
+
+		self.cf_dropdown = QtWidgets.QComboBox()
+		self.cf_dropdown.addItems(["mhz", "ghz"])
+		self.cf_dropdown.currentTextChanged.connect(self.configCFMultiplier)
+	
+	def configCFMultiplier(self, multiplier):
 		self.cfMultiplier = self.multipliers[multiplier]
+	
+	def configCFInput(self, cf_input):
+		self.cf_input = cf_input
 
 	def configSamplingFreq(self):
 		self.sampling_freq_label = QtWidgets.QLabel("Sampling Frequency")
@@ -169,11 +177,37 @@ class mainWindow(QtWidgets.QMainWindow):
 		if self.run_analysis_btn_check:
 			self.run_analysis_btn.setText("Stop")
 			self.setWindowTitle("Running analysis...")
-			self.analyse = Worker(self.runAnalysis(self.params))
-			self.threadpool.start(self.analyse)
+			self.connectSA()
+			self.runAnalysisThread()
 		else:
 			self.run_analysis_btn.setText("Run")
 			self.setWindowTitle(self.window_title)
+			try:
+				self.thread.exit()
+			except:
+				pass
+	
+	def runAnalysisThread(self):
+		self.worker = Worker(self.params)
+		self.worker.moveToThread(self.thread)
+		self.thread.started.connect(self.worker.run)
+		self.thread.start()
+		self.worker.finished.connect(self.runAnalysisRecursion)
+
+	def runAnalysisRecursion(self):
+		print(self.run_analysis_btn_check)
+		self.thread.quit()
+		self.worker.deleteLater()
+		if self.run_analysis_btn_check:
+			self.runAnalysisThread()
+	
+	def btnGetBatt(self):
+		self.get_batt_btn = QtWidgets.QPushButton("Battery", self)
+		self.sideBarLayout.addWidget(self.get_batt_btn)
+		self.get_batt_btn.clicked.connect(self.btnGetBattPressed)
+
+	def btnGetBattPressed(self):
+		self.get_batt_btn.setText(str(self.getBatt()))
 
 	def connectSA(self):
 		if self.check_set_config_iq == False:
@@ -182,7 +216,8 @@ class mainWindow(QtWidgets.QMainWindow):
 
 	def getBatt(self):
 		self.connectSA()
-		print(getBatteryStatus())
+		batt = getBatteryStatus()["charge"]
+		return batt
 	
 	def updateAnalysisState(self, status):
 		self.run_analysis = status
@@ -191,7 +226,7 @@ class mainWindow(QtWidgets.QMainWindow):
 		# While run_analysis is toggled to True
 		self.connectSA()
 		while self.run_analysis_btn_check:
-			config_block_iq(params['center_freq'], params['ref_level'], params['bandwidth'], 1024)
+			config_block_iq(params['cf'], params['ref_level'], params['bandwidth'], 1024)
 			data = acquire_block_iq(1024, self.params["num_records"])
 			predictions = predict_post('http://localhost:3000/predict', data)
 			print(predictions)

@@ -16,7 +16,8 @@ def checkArgs(args):
 # program
 def doStuff():
 	# config_block_iq(args.centerFreq, args.refLevel, args.bandwidth, 1024)
-	config_block_iq(2.44e9, 0, 40e6, 1024)
+	# config_block_iq(2.44e9, 0, 40e6, 1024)
+	config_block_iq(5.18e9, 0, 40e6, 1024)
 
 	while True:
 		data = acquire_block_iq(1024, 10)
