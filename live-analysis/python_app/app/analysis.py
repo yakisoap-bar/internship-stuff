@@ -1,4 +1,4 @@
-from PySide6 import QtCore, QtWidgets, QtGui
+from PySide6 import QtCore, QtWidgets, QtGui, QtCharts
 
 from Functions.Collect import *
 from Functions.Request import *
@@ -8,8 +8,8 @@ class AnalysisWindow(QtWidgets.QWidget):
 	def __init__(self) -> None:
 		super().__init__()
 
-		# Threading stuff
 		self.analysis_thread = QtCore.QThread()
+		self.check_chart_displayed = False
 
 		self.configs()
 
@@ -20,6 +20,11 @@ class AnalysisWindow(QtWidgets.QWidget):
 		self.window_title = "Live Classification"
 		self.setWindowTitle(self.window_title)
 		self.setWindowIcon(QtGui.QIcon('./img/icon.png'))
+
+	def updateLayout(self):
+		layout = QtWidgets.QVBoxLayout()
+		layout.addWidget(self._chart_view)
+		self.setLayout(layout)
 
 	def getScreenRes(self):
 		screen = QtWidgets.QApplication.primaryScreen()
@@ -47,11 +52,36 @@ class AnalysisWindow(QtWidgets.QWidget):
 		self.worker.deleteLater()
 		if self.run_analysis_btn_check:
 			self.runAnalysisThread()
-	
-	def updateGraph(self, predictions):
-		print(predictions)
-	
 
+	def updateGraph(self, res):
+		if res[0] == 200:
+			res = res[1]
+			self.pieChart(res)
+			print(res)
+		else:
+			print(res)
+	
+	def pieChart(self, res):
+		if self.check_chart_displayed:
+			self.chart_data.clear()
+
+			for i in range(0, len(res['signalNames'])):
+				self.chart_data.append(res['signalNames'][i], res['predictions'][i])
+		else:
+			self.chart_data = QtCharts.QPieSeries()
+
+			self.chart = QtCharts.QChart()
+			self.chart.addSeries(self.chart_data)
+			self.chart.setTitle('Predictions')
+
+			self._chart_view = QtCharts.QChartView(self.chart)
+			self._chart_view.setRenderHint(QtGui.QPainter.Antialiasing)
+
+			self.updateLayout()
+
+			self.check_chart_displayed = True
+
+	
 class Worker(QtCore.QObject):
 	started = QtCore.Signal()
 	graphData = QtCore.Signal(object)
