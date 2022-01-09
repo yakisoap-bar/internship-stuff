@@ -1,7 +1,7 @@
 import sys, threading
 from PySide6 import QtCore, QtWidgets, QtGui
 
-from app.analysis import Worker
+from app.analysis import Worker, AnalysisWindow
 
 from Functions.Collect import *
 from Functions.Request import *
@@ -10,9 +10,8 @@ from Functions.Status import *
 class mainWindow(QtWidgets.QMainWindow):
 	def __init__(self) -> None:
 		super().__init__()
-
-		# Threading stuff
-		self.thread = QtCore.QThread()
+		# Analysis Window
+		self.analysis_window = AnalysisWindow()
 
 		# Global vars
 		self.check_set_config_iq = False		
@@ -175,31 +174,26 @@ class mainWindow(QtWidgets.QMainWindow):
 	def btnRunAnalysisPressed(self, checked):
 		self.run_analysis_btn_check = checked
 		if self.run_analysis_btn_check:
+			# GUI updates
 			self.run_analysis_btn.setText("Stop")
 			self.setWindowTitle("Running analysis...")
+
+			# Open new window
+			self.toggleAnalysisWindow(True)
+
+			# Actual analysis
 			self.connectSA()
-			self.runAnalysisThread()
+			self.analysis_window.updateParams(self.params)
+			self.analysis_window.updateAnalysisCheck(True)
+
 		else:
+			# GUI updates
 			self.run_analysis_btn.setText("Run")
 			self.setWindowTitle(self.window_title)
-			try:
-				self.thread.exit()
-			except:
-				pass
-	
-	def runAnalysisThread(self):
-		self.worker = Worker(self.params)
-		self.worker.moveToThread(self.thread)
-		self.thread.started.connect(self.worker.run)
-		self.thread.start()
-		self.worker.finished.connect(self.runAnalysisRecursion)
 
-	def runAnalysisRecursion(self):
-		print(self.run_analysis_btn_check)
-		self.thread.quit()
-		self.worker.deleteLater()
-		if self.run_analysis_btn_check:
-			self.runAnalysisThread()
+			self.analysis_window.updateAnalysisCheck(False)
+			# Close analysis window
+			self.toggleAnalysisWindow(False)
 	
 	def btnGetBatt(self):
 		self.get_batt_btn = QtWidgets.QPushButton("Battery", self)
@@ -216,8 +210,9 @@ class mainWindow(QtWidgets.QMainWindow):
 
 	def getBatt(self):
 		self.connectSA()
-		batt = getBatteryStatus()["charge"]
-		return batt
+		batt = getBatteryStatus()
+		print(batt)
+		return batt["charge"]
 	
 	def updateAnalysisState(self, status):
 		self.run_analysis = status
@@ -231,6 +226,14 @@ class mainWindow(QtWidgets.QMainWindow):
 			predictions = predict_post('http://localhost:3000/predict', data)
 			print(predictions)
 			# print([predictions["signalNames"], predictions["predictions"]])
+	
+	def toggleAnalysisWindow(self, check):
+		if check:
+			self.analysis_window = AnalysisWindow()
+			self.analysis_window.show()
+		else:
+			self.analysis_window.close()
+			self.analysis_window = None
 	
 # Run the application
 def main():
