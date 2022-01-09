@@ -12,6 +12,7 @@ class AnalysisWindow(QtWidgets.QWidget):
 		self.check_chart_displayed = False
 
 		self.configs()
+		self.updateLayout()
 
 	def configs(self):
 		# App config things
@@ -20,8 +21,17 @@ class AnalysisWindow(QtWidgets.QWidget):
 		self.window_title = "Live Classification"
 		self.setWindowTitle(self.window_title)
 		self.setWindowIcon(QtGui.QIcon('./img/icon.png'))
-
+	
 	def updateLayout(self):
+		self.initPieChart()
+		self.chart = QtCharts.QChart()
+		self.chart.setTitle('Predictions')
+		self.chart.addSeries(self.chart_data)
+		self.chart.legend().setVisible(True)
+
+		self._chart_view = QtCharts.QChartView(self.chart)
+		self._chart_view.setRenderHint(QtGui.QPainter.Antialiasing)
+
 		layout = QtWidgets.QVBoxLayout()
 		layout.addWidget(self._chart_view)
 		self.setLayout(layout)
@@ -56,32 +66,42 @@ class AnalysisWindow(QtWidgets.QWidget):
 	def updateGraph(self, res):
 		if res[0] == 200:
 			res = res[1]
-			self.pieChart(res)
-			print(res)
-		else:
-			print(res)
-	
-	def pieChart(self, res):
-		if self.check_chart_displayed:
 			self.chart_data.clear()
-
-			for i in range(0, len(res['signalNames'])):
-				self.chart_data.append(res['signalNames'][i], res['predictions'][i])
+			self.updateChart(res)
 		else:
-			self.chart_data = QtCharts.QPieSeries()
-
-			self.chart = QtCharts.QChart()
-			self.chart.addSeries(self.chart_data)
-			self.chart.setTitle('Predictions')
-
-			self._chart_view = QtCharts.QChartView(self.chart)
-			self._chart_view.setRenderHint(QtGui.QPainter.Antialiasing)
-
-			self.updateLayout()
-
-			self.check_chart_displayed = True
-
+			print(res)
 	
+	def initPieChart(self):
+		self.chart_data = QtCharts.QPieSeries()
+		self.updateChart = self.updatePieChart
+
+	def updatePieChart(self, res):
+		for i in range(0, len(res['signalNames'])):
+			self.chart_data.append(res['signalNames'][i], res['predictions'][i])
+	
+	def initBarChart(self):
+		self.check_labels = False
+		self.chart_data = QtCharts.QHorizontalBarSeries()
+
+		self.updateChart = self.updateHorizontalBarChart
+	
+	def updateHorizontalBarChart(self, res):
+		for i in range(0, len(res['signalNames'])):
+			data = QtCharts.QBarSet(str(i))
+			data.append(res['predictions'][i])
+			self.chart_data.append(data)
+		
+		self.axisY = QtCharts.QBarCategoryAxis()
+		self.axisY.append(res['signalNames'])
+		self.chart.addAxis(self.axisY, QtCore.Qt.QtAlignLeft)
+		self.chart_data.attachAxis(self.axisY)
+		
+		self.axisX = QtCharts.QValueAxis()
+		self.chart.addAxis(self.axisX, QtCore.Qt.QtAlignBottom)
+		self.chart_data.attachAxis(self.axisX)
+
+		self.chart.legend().setAlignment(QtCore.Qt.AlignLeft)
+
 class Worker(QtCore.QObject):
 	started = QtCore.Signal()
 	graphData = QtCore.Signal(object)
