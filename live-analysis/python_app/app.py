@@ -116,15 +116,16 @@ class mainWindow(QtWidgets.QMainWindow):
 			self.resize(QtCore.QSize.minimumSizeHint())
 
 			# Check through configs and save them to params
+			self.analysis_window.updateParams(self.params)
 
 	def configBandwidth(self):
 		self.bandwidth_label = QtWidgets.QLabel("Bandwidth")
 		self.bandwidth_input = QtWidgets.QLineEdit()
-		self.bandwidth_input.textChanged.connect(self.configBandwidthInput)
+		# self.bandwidth_input.textChanged.connect(self.configBandwidthInput)
 
 		self.bandwidth_dropdown = QtWidgets.QComboBox()
 		self.bandwidth_dropdown.addItems(["khz", "mhz"])
-		self.bandwidth_dropdown.currentTextChanged.connect(self.configCFMultiplier)
+		# self.bandwidth_dropdown.currentTextChanged.connect(self.configCFMultiplier)
 	
 	def configBWMultiplier(self, multiplier):
 		self.bwMultiplier = self.multipliers[multiplier]
@@ -138,7 +139,7 @@ class mainWindow(QtWidgets.QMainWindow):
 
 		self.cf_dropdown = QtWidgets.QComboBox()
 		self.cf_dropdown.addItems(["mhz", "ghz"])
-		self.cf_dropdown.currentTextChanged.connect(self.configCFMultiplier)
+		# self.cf_dropdown.currentTextChanged.connect(self.configCFMultiplier)
 	
 	def configCFMultiplier(self, multiplier):
 		self.cfMultiplier = self.multipliers[multiplier]
@@ -210,19 +211,6 @@ class mainWindow(QtWidgets.QMainWindow):
 		batt = getBatteryStatus()
 		print(batt)
 		return batt["charge"]
-	
-	def updateAnalysisState(self, status):
-		self.run_analysis = status
-
-	def runAnalysis(self, params):
-		# While run_analysis is toggled to True
-		self.connectSA()
-		while self.run_analysis_btn_check:
-			config_block_iq(params['cf'], params['ref_level'], params['bandwidth'], 1024)
-			data = acquire_block_iq(1024, self.params["num_records"])
-			predictions = predict_post('http://localhost:3000/predict', data)
-			print(predictions)
-			# print([predictions["signalNames"], predictions["predictions"]])
 	
 	def toggleAnalysisWindow(self):
 		if self.analysis_window == None:
