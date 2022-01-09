@@ -16,7 +16,7 @@ class AnalysisWindow(QtWidgets.QWidget):
 	def configs(self):
 		# App config things
 		screen_size = self.getScreenRes()
-		# self.setGeometry(0, 0, screen_size.width(), screen_size.height())
+		self.setGeometry(0, 0, screen_size.width(), screen_size.height())
 		self.window_title = "Live Classification"
 		self.setWindowTitle(self.window_title)
 		self.setWindowIcon(QtGui.QIcon('./img/icon.png'))
@@ -39,6 +39,7 @@ class AnalysisWindow(QtWidgets.QWidget):
 		self.worker.moveToThread(self.analysis_thread)
 		self.analysis_thread.started.connect(self.worker.run)
 		self.analysis_thread.start()
+		self.worker.graphData.connect(self.updateGraph)
 		self.worker.finished.connect(self.runAnalysisRecursion)
 
 	def runAnalysisRecursion(self):
@@ -47,9 +48,13 @@ class AnalysisWindow(QtWidgets.QWidget):
 		if self.run_analysis_btn_check:
 			self.runAnalysisThread()
 	
+	def updateGraph(self, predictions):
+		print(predictions)
+	
 
 class Worker(QtCore.QObject):
 	started = QtCore.Signal()
+	graphData = QtCore.Signal(object)
 	finished = QtCore.Signal()
 
 	def __init__(self, params) -> None:
@@ -65,5 +70,5 @@ class Worker(QtCore.QObject):
 		predictions = predict_post('http://localhost:3000/predict', data)
 
 		# Update stuff here
-		print(predictions)
+		self.graphData.emit(predictions)
 		self.finished.emit()

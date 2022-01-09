@@ -10,10 +10,8 @@ from Functions.Status import *
 class mainWindow(QtWidgets.QMainWindow):
 	def __init__(self) -> None:
 		super().__init__()
-		# Analysis Window
-		self.analysis_window = AnalysisWindow()
-
 		# Global vars
+		self.analysis_window = None
 		self.check_set_config_iq = False		
 		self.mainLayout = QtWidgets.QGridLayout
 		self.sideBarLayout = QtWidgets.QVBoxLayout();
@@ -179,7 +177,7 @@ class mainWindow(QtWidgets.QMainWindow):
 			self.setWindowTitle("Running analysis...")
 
 			# Open new window
-			self.toggleAnalysisWindow(True)
+			self.toggleAnalysisWindow()
 
 			# Actual analysis
 			self.connectSA()
@@ -191,9 +189,8 @@ class mainWindow(QtWidgets.QMainWindow):
 			self.run_analysis_btn.setText("Run")
 			self.setWindowTitle(self.window_title)
 
-			self.analysis_window.updateAnalysisCheck(False)
 			# Close analysis window
-			self.toggleAnalysisWindow(False)
+			self.analysis_window.updateAnalysisCheck(False)
 	
 	def btnGetBatt(self):
 		self.get_batt_btn = QtWidgets.QPushButton("Battery", self)
@@ -227,13 +224,10 @@ class mainWindow(QtWidgets.QMainWindow):
 			print(predictions)
 			# print([predictions["signalNames"], predictions["predictions"]])
 	
-	def toggleAnalysisWindow(self, check):
-		if check:
+	def toggleAnalysisWindow(self):
+		if self.analysis_window == None:
 			self.analysis_window = AnalysisWindow()
 			self.analysis_window.show()
-		else:
-			self.analysis_window.close()
-			self.analysis_window = None
 	
 # Run the application
 def main():
