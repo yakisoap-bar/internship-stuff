@@ -13,9 +13,9 @@ class mainWindow(QtWidgets.QMainWindow):
 		# Global vars
 		self.analysis_window = None
 		self.check_set_config_iq = False		
-		self.mainLayout = QtWidgets.QGridLayout
-		self.sideBarLayout = QtWidgets.QVBoxLayout();
-		self.configLayout = QtWidgets.QVBoxLayout()
+		self.mainLayout = QtWidgets.QGridLayout()
+		self.sideBarLayout = QtWidgets.QVBoxLayout()
+		self.config_layout = QtWidgets.QFormLayout()
 		self.run_analysis_btn_check = False
 
 		self.multipliers = {
@@ -50,10 +50,11 @@ class mainWindow(QtWidgets.QMainWindow):
 	
 	def appLayout(self):
 		self.menuToolbar()
-		self.sideBarLayout.addLayout(self.configLayout)
+		self.mainLayout.addLayout(self.sideBarLayout, 0, 0)
+		self.mainLayout.addLayout(self.config_layout, 1, 0)
 
 		self.container = QtWidgets.QWidget()
-		self.container.setLayout(self.sideBarLayout)
+		self.container.setLayout(self.mainLayout)
 		self.setCentralWidget(self.container)
 
 	def buttons(self):
@@ -65,6 +66,15 @@ class mainWindow(QtWidgets.QMainWindow):
 		self.configBandwidth()
 		self.configRefLvl()
 		self.configSamplingFreq()
+	
+		# Config buttons layout
+		self.config_layout.addRow(self.cf_label)
+		self.config_layout.addRow(self.cf_input, self.cf_dropdown)
+		self.config_layout.addRow(self.bandwidth_label)
+		self.config_layout.addRow(self.bandwidth_input, self.bandwidth_dropdown)
+		self.config_layout.addRow(self.ref_lvl_label, self.ref_lvl_input)
+		self.config_layout.addRow(self.ref_lvl_slider)
+		self.config_layout.addRow(self.sampling_freq_label, self.sampling_freq_input)
 
 		self.config_buttons = [
 			self.cf_label,
@@ -81,7 +91,6 @@ class mainWindow(QtWidgets.QMainWindow):
 		]
 		# All the config buttons are a pain
 		for button in self.config_buttons:
-			self.configLayout.addWidget(button)
 			button.hide()
 	
 	def getScreenRes(self):
