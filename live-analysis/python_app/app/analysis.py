@@ -23,11 +23,11 @@ class AnalysisWindow(QtWidgets.QWidget):
 		self.setWindowIcon(QtGui.QIcon('./img/icon.png'))
 	
 	def updateLayout(self):
-		self.initPieChart()
 		self.chart = QtCharts.QChart()
 		self.chart.setTitle('Predictions')
+
+		self.initBarChart()
 		self.chart.addSeries(self.chart_data)
-		self.chart.legend().setVisible(True)
 
 		self._chart_view = QtCharts.QChartView(self.chart)
 		self._chart_view.setRenderHint(QtGui.QPainter.Antialiasing)
@@ -82,25 +82,41 @@ class AnalysisWindow(QtWidgets.QWidget):
 	def initBarChart(self):
 		self.check_labels = False
 		self.chart_data = QtCharts.QHorizontalBarSeries()
+		self.chart.setAnimationOptions(QtCharts.QChart.SeriesAnimations)
+
 
 		self.updateChart = self.updateHorizontalBarChart
 	
 	def updateHorizontalBarChart(self, res):
-		for i in range(0, len(res['signalNames'])):
-			data = QtCharts.QBarSet(str(i))
-			data.append(res['predictions'][i])
-			self.chart_data.append(data)
+		# Round predictions
+		predictions = res['predictions']
+		for i in range(len(predictions)):
+			predictions[i] = round(predictions[i]*100, 2)
 		
-		self.axisY = QtCharts.QBarCategoryAxis()
-		self.axisY.append(res['signalNames'])
-		self.chart.addAxis(self.axisY, QtCore.Qt.QtAlignLeft)
-		self.chart_data.attachAxis(self.axisY)
-		
-		self.axisX = QtCharts.QValueAxis()
-		self.chart.addAxis(self.axisX, QtCore.Qt.QtAlignBottom)
-		self.chart_data.attachAxis(self.axisX)
+		print(predictions)
 
-		self.chart.legend().setAlignment(QtCore.Qt.AlignLeft)
+		data = QtCharts.QBarSet("Confidence")
+		data.append(predictions)
+		self.chart_data.clear()
+		self.chart_data.append(data)
+		
+		if self.check_chart_displayed == False:
+			self.axisY = QtCharts.QBarCategoryAxis()
+			self.axisY.append(res['signalNames'])
+			self.chart.addAxis(self.axisY, QtCore.Qt.AlignLeft)
+			self.chart_data.attachAxis(self.axisY)
+			self.check_chart_displayed = True
+
+			self.axisX = QtCharts.QValueAxis()
+			self.axisX.setRange(0, 100)
+			self.chart.addAxis(self.axisX, QtCore.Qt.AlignBottom)
+			self.chart_data.attachAxis(self.axisX)
+
+			self.chart.legend().setAlignment(QtCore.Qt.AlignBottom)
+			self.chart.legend().setVisible(True)
+
+		else:
+			self.axisX.applyNiceNumbers()
 
 class Worker(QtCore.QObject):
 	started = QtCore.Signal()

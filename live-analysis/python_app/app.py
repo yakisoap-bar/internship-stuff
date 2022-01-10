@@ -101,7 +101,7 @@ class mainWindow(QtWidgets.QMainWindow):
 		context.exec_(e.globalPos())
 	
 	def btnShowConfigs(self):
-		self.show_configs_btn = QtWidgets.QPushButton("Configure", self)
+		self.show_configs_btn = QtWidgets.QPushButton("Update Configurations", self)
 		self.sideBarLayout.addWidget(self.show_configs_btn)
 		self.show_configs_btn.setCheckable(True)
 		self.show_configs_btn.clicked.connect(self.btnShowConfigsPressed)
