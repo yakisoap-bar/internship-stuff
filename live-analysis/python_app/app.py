@@ -20,16 +20,18 @@ class mainWindow(QtWidgets.QMainWindow):
 
 		self.multipliers = {
 			"khz": 1000,
-			"mhz": 10001000,
-			"ghz": 10
+			"mhz": 1000000,
+			"ghz": 1000000000
 		}
 
 		# Default analyzing params
 		self.params = {
 			"num_records": 10,
 			"cf": 2.44e9,
+			"sample_rate": 0,
 			"ref_level": 0,
-			"bandwidth": 40e6
+			"bandwidth": 40e6,
+			"record_length": 1024
 		}
 
 		self.configs()
@@ -113,7 +115,7 @@ class mainWindow(QtWidgets.QMainWindow):
 			# Remove from layout
 			for button in self.config_buttons:
 				button.hide()
-			self.resize(QtCore.QSize.minimumSizeHint())
+			# self.resize(QtCore.QSize.minimumSizeHint())
 
 			# Check through configs and save them to params
 			self.analysis_window.updateParams(self.params)
@@ -121,39 +123,54 @@ class mainWindow(QtWidgets.QMainWindow):
 	def configBandwidth(self):
 		self.bandwidth_label = QtWidgets.QLabel("Bandwidth")
 		self.bandwidth_input = QtWidgets.QLineEdit()
-		# self.bandwidth_input.textChanged.connect(self.configBandwidthInput)
+		self.bandwidth_input.textChanged.connect(self.configBandwidthInputModified)
 
 		self.bandwidth_dropdown = QtWidgets.QComboBox()
 		self.bandwidth_dropdown.addItems(["khz", "mhz"])
-		# self.bandwidth_dropdown.currentTextChanged.connect(self.configCFMultiplier)
+		self.bwMultiplier = self.multipliers["khz"]
+		self.bandwidth_dropdown.currentTextChanged.connect(self.configCFMultiplier)
+
+		self.bandwidth_input.setText(str(self.params['bandwidth']/self.bwMultiplier))
 	
 	def configBWMultiplier(self, multiplier):
 		self.bwMultiplier = self.multipliers[multiplier]
 	
-	def configBandwidthInput(self, bw_input):
-		self.bw_input = bw_input
+	def configBandwidthInputModified(self, bw_input):
+		self.params['bandwidth'] = float(bw_input)*self.bwMultiplier
 	
 	def configCF(self):
 		self.cf_label = QtWidgets.QLabel("Center Frequency")
 		self.cf_input = QtWidgets.QLineEdit()
+		self.cf_input.textChanged.connect(self.configCFInputModified)
 
 		self.cf_dropdown = QtWidgets.QComboBox()
 		self.cf_dropdown.addItems(["mhz", "ghz"])
-		# self.cf_dropdown.currentTextChanged.connect(self.configCFMultiplier)
+		self.cfMultiplier = self.multipliers['mhz']
+		self.cf_dropdown.currentTextChanged.connect(self.configCFMultiplier)
+
+		self.cf_input.setText(str(self.params['cf']/self.cfMultiplier))
 	
 	def configCFMultiplier(self, multiplier):
 		self.cfMultiplier = self.multipliers[multiplier]
 	
-	def configCFInput(self, cf_input):
-		self.cf_input = cf_input
+	def configCFInputModified(self, cf_input):
+		self.params['cf'] = float(cf_input)*self.cfMultiplier
 
 	def configSamplingFreq(self):
 		self.sampling_freq_label = QtWidgets.QLabel("Sampling Frequency")
 		self.sampling_freq_input = QtWidgets.QLineEdit()
+		self.sampling_freq_input.textChanged.connect(self.configSamplingFreqInputModified)
+
+		self.sampling_freq_input.setText(str(self.params['sample_rate']))
+	
+	def configSamplingFreqInputModified(self, sample_input):
+		self.params['sample_rate'] = int(sample_input)
 
 	def configRefLvl(self):
 		self.ref_lvl_label = QtWidgets.QLabel("Reference Level")
 		self.ref_lvl_input = QtWidgets.QLineEdit()
+		self.ref_lvl_input.textChanged.connect(self.configRefLvlInputModified)
+		self.ref_lvl_input.setText(str(self.params['ref_level']))
 
 		self.ref_lvl_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
 		self.ref_lvl_slider.setMinimum(0)
@@ -161,8 +178,13 @@ class mainWindow(QtWidgets.QMainWindow):
 		self.ref_lvl_slider.setSingleStep(1)
 		self.ref_lvl_slider.valueChanged.connect(self.configRefLvlSliderVal)
 	
+	def configRefLvlInputModified(self, value):
+		self.params['ref_level'] = int(value)
+	
 	def configRefLvlSliderVal(self, value):
-		self.ref_level = value
+		self.params['ref_level'] = value
+		self.ref_lvl_input.clear()
+		self.ref_lvl_input.insert(str(self.params['ref_level']))
 		
 	def btnRunAnalysis(self):
 		self.run_analysis_btn = QtWidgets.QPushButton("Run", self)

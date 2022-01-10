@@ -62,7 +62,7 @@ def device_connect():
 
     return output
 
-def config_block_iq(cf=1e9, refLevel=0, iqBw=40e6, recordLength=10e3):
+def config_block_iq(cf=1e9, refLevel=0, iqBw=40e6, recordLength=10e3, sampleRate=0):
     '''
     Configure IQ collection parameters for the connected Spectrum Analyser.
 
@@ -80,7 +80,7 @@ def config_block_iq(cf=1e9, refLevel=0, iqBw=40e6, recordLength=10e3):
     rsa.IQBLK_SetIQBandwidth(c_double(iqBw))
     rsa.IQBLK_SetIQRecordLength(c_int(recordLength))
 
-    iqSampleRate = c_double(0)
+    iqSampleRate = c_double(sampleRate)
     rsa.IQBLK_GetIQSampleRate(byref(iqSampleRate))
 
 

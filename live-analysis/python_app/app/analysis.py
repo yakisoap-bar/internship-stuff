@@ -115,9 +115,10 @@ class Worker(QtCore.QObject):
 	def run(self):
 		self.started.emit()
 		# Predict
-		config_block_iq(self.params['cf'], self.params['ref_level'], self.params['bandwidth'], 1024)
+		config_block_iq(self.params['cf'], self.params['ref_level'], self.params['bandwidth'], self.params['record_length'], self.params['sample_rate'])
 		data = acquire_block_iq(1024, self.params["num_records"])
 		predictions = predict_post('http://localhost:3000/predict', data)
+		print(predictions)
 
 		# Update stuff here
 		self.graphData.emit(predictions)
