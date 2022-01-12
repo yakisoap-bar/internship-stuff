@@ -46,7 +46,12 @@ class mainWindow(QtWidgets.QMainWindow):
 		# self.setGeometry(0, 0, screen_size.width(), screen_size.height())
 		self.window_title = "Live Classification"
 		self.setWindowTitle(self.window_title)
-		self.setWindowIcon(QtGui.QIcon('./img/icon.png'))
+		
+		icon = QtGui.QIcon()	
+		iconLocation = './img/icon.png'
+		iconLocation = './img/networkneural.png'
+		icon.addPixmap(QtGui.QPixmap(iconLocation), QtGui.QIcon.Selected, QtGui.QIcon.On)
+		self.setWindowIcon(icon)
 	
 	def appLayout(self):
 		self.menuToolbar()
@@ -140,14 +145,14 @@ class mainWindow(QtWidgets.QMainWindow):
 		self.bwMultiplier = self.multipliers["khz"]
 		self.bandwidth_dropdown.currentTextChanged.connect(self.configBWMultiplier)
 
-		self.bandwidth_input.setText(str(self.params['bandwidth']/self.bwMultiplier))
+		self.bandwidth_input.setText(str(self.params['bandwidth']/self.bwMultiplier/10))
 	
 	def configBWMultiplier(self, multiplier):
 		self.bwMultiplier = self.multipliers[multiplier]
 	
 	def configBandwidthInputModified(self, bw_input):
 		try:
-			self.params['bandwidth'] = float(bw_input)*self.bwMultiplier
+			self.params['bandwidth'] = float(bw_input)*self.bwMultiplier/10
 		except ValueError:
 			self.params['bandwidth'] = 0
 	
