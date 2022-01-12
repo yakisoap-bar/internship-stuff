@@ -11,7 +11,7 @@ class mainWindow(QtWidgets.QMainWindow):
 	def __init__(self) -> None:
 		super().__init__()
 		# Global vars
-		self.analysis_window = None
+		self.analysis_window = AnalysisWindow()
 		self.check_set_config_iq = False		
 		self.mainLayout = QtWidgets.QGridLayout()
 		self.sideBarLayout = QtWidgets.QVBoxLayout()
@@ -19,9 +19,9 @@ class mainWindow(QtWidgets.QMainWindow):
 		self.run_analysis_btn_check = False
 
 		self.multipliers = {
-			"khz": 1000,
-			"mhz": 1000000,
-			"ghz": 1000000000
+			"khz": 10e3,
+			"mhz": 10e6,
+			"ghz": 10e9
 		}
 
 		# Default analyzing params
@@ -145,7 +145,10 @@ class mainWindow(QtWidgets.QMainWindow):
 		self.bwMultiplier = self.multipliers[multiplier]
 	
 	def configBandwidthInputModified(self, bw_input):
-		self.params['bandwidth'] = float(bw_input)*self.bwMultiplier
+		try:
+			self.params['bandwidth'] = float(bw_input)*self.bwMultiplier
+		except ValueError:
+			self.params['bandwidth'] = 0
 	
 	def configCF(self):
 		self.cf_label = QtWidgets.QLabel("Center Frequency")
@@ -163,7 +166,10 @@ class mainWindow(QtWidgets.QMainWindow):
 		self.cfMultiplier = self.multipliers[multiplier]
 	
 	def configCFInputModified(self, cf_input):
-		self.params['cf'] = float(cf_input)*self.cfMultiplier
+		try:
+			self.params['cf'] = float(cf_input)*self.cfMultiplier
+		except ValueError:
+			self.params['cf'] = 0
 
 	def configSamplingFreq(self):
 		self.sampling_freq_label = QtWidgets.QLabel("Sampling Frequency")
@@ -244,8 +250,8 @@ class mainWindow(QtWidgets.QMainWindow):
 		return batt["charge"]
 	
 	def toggleAnalysisWindow(self):
-		if self.analysis_window == None:
-			self.analysis_window = AnalysisWindow()
+		# if self.analysis_window == None:
+		# 	self.analysis_window = AnalysisWindow()
 			self.analysis_window.show()
 	
 # Run the application
