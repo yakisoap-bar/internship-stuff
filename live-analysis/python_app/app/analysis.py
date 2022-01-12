@@ -52,7 +52,7 @@ class AnalysisWindow(QtWidgets.QWidget):
 	def runAnalysisThread(self):
 		self.worker = Worker(self.params)
 		self.worker.moveToThread(self.analysis_thread)
-		self.analysis_thread.started.connect(self.worker.run)
+		self.analysis_thread.started.connect(self.worker.runAnalysis)
 		self.analysis_thread.start()
 		self.worker.graphData.connect(self.updateGraph)
 		self.worker.finished.connect(self.runAnalysisRecursion)
@@ -83,7 +83,6 @@ class AnalysisWindow(QtWidgets.QWidget):
 		self.check_labels = False
 		self.chart_data = QtCharts.QHorizontalBarSeries()
 		self.chart.setAnimationOptions(QtCharts.QChart.SeriesAnimations)
-
 
 		self.updateChart = self.updateHorizontalBarChart
 	
@@ -128,7 +127,7 @@ class Worker(QtCore.QObject):
 		self.params = params
 
 	@QtCore.Slot()
-	def run(self):
+	def runAnalysis(self):
 		self.started.emit()
 		# Predict
 		config_block_iq(self.params['cf'], self.params['ref_level'], self.params['bandwidth'], self.params['record_length'], self.params['sample_rate'])
@@ -139,3 +138,8 @@ class Worker(QtCore.QObject):
 		# Update stuff here
 		self.graphData.emit(predictions)
 		self.finished.emit()
+	
+	@QtCore.Slot()
+	def runBatteryCheck(self):
+		batt = getBatteryStatus()
+		self.finished.emit(batt)
