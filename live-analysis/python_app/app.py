@@ -19,9 +19,9 @@ class mainWindow(QtWidgets.QMainWindow):
 		self.run_analysis_btn_check = False
 
 		self.multipliers = {
-			"khz": 100,
-			"mhz": 100000,
-			"ghz": 1000000000
+			"khz": 1e3,
+			"mhz": 1e6,
+			"ghz": 1e9
 		}
 
 		# Default analyzing params
@@ -128,6 +128,7 @@ class mainWindow(QtWidgets.QMainWindow):
 
 			# Check through configs and save them to params
 			self.analysis_window.updateParams(self.params)
+			print(self.params)
 
 	def configBandwidth(self):
 		self.bandwidth_label = QtWidgets.QLabel("Bandwidth")
