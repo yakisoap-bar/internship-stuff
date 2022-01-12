@@ -137,7 +137,7 @@ class mainWindow(QtWidgets.QMainWindow):
 		self.bandwidth_dropdown = QtWidgets.QComboBox()
 		self.bandwidth_dropdown.addItems(["khz", "mhz"])
 		self.bwMultiplier = self.multipliers["khz"]
-		self.bandwidth_dropdown.currentTextChanged.connect(self.configCFMultiplier)
+		self.bandwidth_dropdown.currentTextChanged.connect(self.configBWMultiplier)
 
 		self.bandwidth_input.setText(str(self.params['bandwidth']/self.bwMultiplier))
 	
