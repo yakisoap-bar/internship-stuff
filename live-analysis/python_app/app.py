@@ -19,9 +19,9 @@ class mainWindow(QtWidgets.QMainWindow):
 		self.run_analysis_btn_check = False
 
 		self.multipliers = {
-			"khz": 10e3,
-			"mhz": 10e6,
-			"ghz": 10e9
+			"khz": 100,
+			"mhz": 100000,
+			"ghz": 1000000000
 		}
 
 		# Default analyzing params
