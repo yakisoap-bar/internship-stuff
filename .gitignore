@@ -1,7 +1,7 @@
 .ipynb_checkpoints
 /datasets
 /saved_models
-.vscode
+.vscode/
 .idea
 .replit
 node_modules
