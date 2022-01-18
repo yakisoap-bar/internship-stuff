@@ -1,5 +1,5 @@
 import sys, threading
-from PySide6 import QtCore, QtWidgets, QtGui
+from PySide6 import QtCore, QtWidgets, QtGui, QtCharts
 
 from app.analysis import Worker, AnalysisWindow
 
@@ -11,20 +11,21 @@ class mainWindow(QtWidgets.QMainWindow):
 	def __init__(self) -> None:
 		super().__init__()
 		# Global vars
+		# self.worker = Worker()
 		self.analysis_thread = QtCore.QThread()
 
-		self.analysis_window = AnalysisWindow()
-		self.worker = Worker()
-
+		# Layouts
 		self.main_layout = QtWidgets.QGridLayout()
 		self.prediction_layout = QtWidgets.QHBoxLayout()
 		self.side_bar_layout = QtWidgets.QVBoxLayout()
 		self.config_layout = QtWidgets.QFormLayout()
+		self.chart_layout = QtWidgets.QVBoxLayout()
 		self.bottom_bar = QtWidgets.QHBoxLayout()
 
 		self.check_set_config_iq = False		
 		self.run_analysis_btn_check = False
 		self.check_open_configs = False
+		self.check_chart_displayed = False
 
 		self.multipliers = {
 			"khz": 1e2,
@@ -65,6 +66,7 @@ class mainWindow(QtWidgets.QMainWindow):
 		self.menuToolbar()
 		self.main_layout.addLayout(self.side_bar_layout, 0, 0)
 		self.main_layout.addLayout(self.config_layout, 1, 0)
+		self.main_layout.addLayout(self.chart_layout, 2, 0)
 		self.main_layout.addLayout(self.bottom_bar, 3, 0)
 
 		self.container = QtWidgets.QWidget()
@@ -103,6 +105,18 @@ class mainWindow(QtWidgets.QMainWindow):
 			self.sampling_freq_label,
 			self.sampling_freq_input,
 		]
+
+		# Chart
+		self.chart = QtCharts.QChart()
+		self.chart.setTitle('Predictions')
+
+		self.initBarChart()
+		self.chart.addSeries(self.chart_data)
+
+		self._chart_view = QtCharts.QChartView(self.chart)
+		self._chart_view.setRenderHint(QtGui.QPainter.Antialiasing)
+
+		self.chart_layout.addWidget(self._chart_view)
 	
 	def getScreenRes(self):
 		screen = QtWidgets.QApplication.primaryScreen()
@@ -229,9 +243,11 @@ class mainWindow(QtWidgets.QMainWindow):
 			self.analysis_window.updateAnalysisCheck(False)
 	
 	def labelGetBatt(self):
-		batt_status = self.getBatt()
-		batt_lvl = batt_status['charge']
-		batt_plugged = batt_status['plugged_in']
+		# batt_status = self.getBatt()
+		# batt_lvl = batt_status['charge']
+		# batt_plugged = batt_status['plugged_in']
+		batt_lvl = 100
+		batt_plugged = False	
 		self.get_batt_label = QtWidgets.QLabel(f'Battery level: {batt_lvl}')
 		self.get_batt_charge = QtWidgets.QLabel(f'Charging: {batt_plugged}')
 		self.bottom_bar.addWidget(self.get_batt_label)
@@ -255,7 +271,97 @@ class mainWindow(QtWidgets.QMainWindow):
 		# if self.analysis_window == None:
 		# 	self.analysis_window = AnalysisWindow()
 			self.analysis_window.show()
+
+	def updateLayout(self):
+		self.chart = QtCharts.QChart()
+		self.chart.setTitle('Predictions')
+
+		self.initBarChart()
+		self.chart.addSeries(self.chart_data)
+
+		self._chart_view = QtCharts.QChartView(self.chart)
+		self._chart_view.setRenderHint(QtGui.QPainter.Antialiasing)
+
+		layout = QtWidgets.QVBoxLayout()
+		layout.addWidget(self._chart_view)
+		self.setLayout(layout)
 	
+	def updateAnalysisCheck(self, check):
+		self.run_analysis_btn_check = check
+		if self.run_analysis_btn_check:
+			self.runAnalysisThread()
+	
+	def updateParams(self, params):
+		self.params = params
+
+	def runAnalysisThread(self):
+		self.worker = Worker(self.params)
+		self.worker.moveToThread(self.analysis_thread)
+		self.analysis_thread.started.connect(self.worker.runAnalysis)
+		self.analysis_thread.start()
+		self.worker.graphData.connect(self.updateGraph)
+		self.worker.finished.connect(self.runAnalysisRecursion)
+
+	def runAnalysisRecursion(self):
+		self.analysis_thread.quit()
+		self.worker.deleteLater()
+		if self.run_analysis_btn_check:
+			self.runAnalysisThread()
+
+	def updateGraph(self, res):
+		if res[0] == 200:
+			res = res[1]
+			self.chart_data.clear()
+			self.updateChart(res)
+		else:
+			print(res)
+	
+	def initPieChart(self):
+		self.chart_data = QtCharts.QPieSeries()
+		self.updateChart = self.updatePieChart
+
+	def updatePieChart(self, res):
+		for i in range(0, len(res['signalNames'])):
+			self.chart_data.append(res['signalNames'][i], res['predictions'][i])
+	
+	def initBarChart(self):
+		self.check_labels = False
+		self.chart_data = QtCharts.QHorizontalBarSeries()
+		self.chart.setAnimationOptions(QtCharts.QChart.SeriesAnimations)
+
+		self.updateChart = self.updateHorizontalBarChart
+	
+	def updateHorizontalBarChart(self, res):
+		# Round predictions
+		predictions = res['predictions']
+		for i in range(len(predictions)):
+			predictions[i] = round(predictions[i]*100, 2)
+		
+		print(predictions)
+
+		data = QtCharts.QBarSet("Confidence")
+		data.append(predictions)
+		self.chart_data.clear()
+		self.chart_data.append(data)
+		
+		if self.check_chart_displayed == False:
+			self.axisY = QtCharts.QBarCategoryAxis()
+			self.axisY.append(res['signalNames'])
+			self.chart.addAxis(self.axisY, QtCore.Qt.AlignLeft)
+			self.chart_data.attachAxis(self.axisY)
+			self.check_chart_displayed = True
+
+			self.axisX = QtCharts.QValueAxis()
+			self.axisX.setRange(0, 100)
+			self.chart.addAxis(self.axisX, QtCore.Qt.AlignBottom)
+			self.chart_data.attachAxis(self.axisX)
+
+			self.chart.legend().setAlignment(QtCore.Qt.AlignBottom)
+			self.chart.legend().setVisible(True)
+
+		else:
+			self.axisX.applyNiceNumbers()
+
 # Run the application
 def main():
 	app = QtWidgets.QApplication([])
