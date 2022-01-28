@@ -1,7 +1,7 @@
 import requests
 
 # send prediction POST request to specified URL
-def predict_post(url, data, filter_check):
+def predict_post(url, data, freq, filter_check):
     '''
     Send POST request to specified URL. 
 
@@ -15,6 +15,7 @@ def predict_post(url, data, filter_check):
     '''
     # put data into dict for sending to server
     body = {'data' : data,
+            'frequency' : freq,
             'filter' : filter_check}
 
     # send request

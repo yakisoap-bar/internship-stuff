@@ -132,7 +132,7 @@ class Worker(QtCore.QObject):
 		# Predict
 		config_block_iq(self.params['cf'], self.params['ref_level'], self.params['bandwidth'], self.params['record_length'], self.params['sample_rate'])
 		data = acquire_block_iq(1024, self.params["num_records"])
-		predictions = predict_post('http://localhost:3000/predict', data, self.params['check_filter'])
+		predictions = predict_post('http://localhost:3000/predict', data, self.params['cf'], self.params['check_filter'])
 		print(predictions)
 
 		# Update stuff here

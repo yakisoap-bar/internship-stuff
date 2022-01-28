@@ -29,9 +29,9 @@ class mainWindow(QtWidgets.QMainWindow):
 		self.check_filter = True	
 
 		self.multipliers = {
-			"khz": 1e2,
-			"mhz": 1e5,
-			"ghz": 1e8
+			"khz": 1e3,
+			"mhz": 1e6,
+			"ghz": 1e9
 		}
 
 		# Default analyzing params
