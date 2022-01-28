@@ -26,6 +26,7 @@ class mainWindow(QtWidgets.QMainWindow):
 		self.run_analysis_btn_check = False
 		self.check_open_configs = False
 		self.check_chart_displayed = False
+		self.check_filter = True	
 
 		self.multipliers = {
 			"khz": 1e2,
@@ -40,7 +41,8 @@ class mainWindow(QtWidgets.QMainWindow):
 			"sample_rate": 0,
 			"ref_level": 0,
 			"bandwidth": 40e6,
-			"record_length": 1024
+			"record_length": 1024,
+			"check_filter": True
 		}
 
 		self.configs()
@@ -65,7 +67,7 @@ class mainWindow(QtWidgets.QMainWindow):
 	def appLayout(self):
 		self.menuToolbar()
 		self.main_layout.addLayout(self.side_bar_layout, 0, 0)
-		# self.main_layout.addLayout(self.config_layout, 1, 0)
+		self.main_layout.addLayout(self.config_layout, 1, 0)
 		self.main_layout.addLayout(self.chart_layout, 2, 0)
 		self.main_layout.addLayout(self.bottom_bar, 3, 0)
 
@@ -140,8 +142,12 @@ class mainWindow(QtWidgets.QMainWindow):
 		self.filter_checkbox.stateChanged.connect(self.configFilterModified)
 	
 	def configFilterModified(self, check):
-		# self.filter_enable = (check == QtCore.Qt.QtChecked)
-		print(check)
+		if check == 2:
+			check = True
+		else:
+			check = False
+
+		self.params['check_filter'] = False
 
 	def configBandwidth(self):
 		self.bandwidth_label = QtWidgets.QLabel("Bandwidth")
