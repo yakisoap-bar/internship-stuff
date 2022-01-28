@@ -74,6 +74,7 @@ class mainWindow(QtWidgets.QMainWindow):
 		self.container = QtWidgets.QWidget()
 		self.container.setLayout(self.main_layout)
 		self.setCentralWidget(self.container)
+		# print(QtWidgets.QWidget.minimumWidth())
 
 	def buttons(self):
 		# Stick all buttons here
@@ -123,7 +124,7 @@ class mainWindow(QtWidgets.QMainWindow):
 
 	def contextMenuEvent(self, e):
 		context = QtWidgets.QMenu(self)
-		context.addAction(QtGui.QAction("Stop/Start Analysis", self))
+		context.addAction(QtWidgets.Action("Stop/Start Analysis", self))
 		context.exec_(e.globalPos())
 	
 	def btnShowConfigs(self):
@@ -151,7 +152,7 @@ class mainWindow(QtWidgets.QMainWindow):
 		else:
 			check = False
 
-		self.params['check_filter'] = False
+		self.params['check_filter'] = check
 
 	def configBandwidth(self):
 		self.bandwidth_label = QtWidgets.QLabel("Bandwidth")
