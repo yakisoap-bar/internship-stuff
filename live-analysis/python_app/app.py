@@ -87,6 +87,7 @@ class mainWindow(QtWidgets.QMainWindow):
 		self.configFilter()
 	
 		# Config buttons layout
+		self.config_layout.addRow(self.filter_label, self.filter_checkbox)
 		self.config_layout.addRow(self.cf_label)
 		self.config_layout.addRow(self.cf_input, self.cf_dropdown)
 		self.config_layout.addRow(self.bandwidth_label)
@@ -94,7 +95,6 @@ class mainWindow(QtWidgets.QMainWindow):
 		self.config_layout.addRow(self.ref_lvl_label, self.ref_lvl_input)
 		self.config_layout.addRow(self.ref_lvl_slider)
 		self.config_layout.addRow(self.sampling_freq_label, self.sampling_freq_input)
-		self.config_layout.addRow(self.filter_label, self.filter_checkbox)
 
 		self.config_buttons = [
 			self.cf_label,
@@ -132,8 +132,12 @@ class mainWindow(QtWidgets.QMainWindow):
 		self.show_configs_btn.clicked.connect(self.btnShowConfigsPressed)
 	
 	def btnShowConfigsPressed(self):
-		self.analysis_window.updateParams(self.params)
-		print(self.params)
+		try:
+			self.analysis_window.updateParams(self.params)
+		except AttributeError:
+			pass
+		finally:
+			print(self.params)
 	
 	def configFilter(self):
 		self.filter_label = QtWidgets.QLabel("Enable filtering")
