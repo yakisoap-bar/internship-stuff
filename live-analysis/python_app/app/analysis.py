@@ -1,4 +1,4 @@
-from PySide6 import QtCore, QtWidgets, QtGui, QtCharts
+from PySide2 import QtCore, QtWidgets, QtGui, QtCharts
 
 from Functions.Collect import *
 from Functions.Request import *
@@ -23,13 +23,13 @@ class AnalysisWindow(QtWidgets.QWidget):
 		self.setWindowIcon(QtGui.QIcon('./img/icon.png'))
 	
 	def updateLayout(self):
-		self.chart = QtCharts.QChart()
+		self.chart = QtCharts.QtCharts.QChart()
 		self.chart.setTitle('Predictions')
 
 		self.initBarChart()
 		self.chart.addSeries(self.chart_data)
 
-		self._chart_view = QtCharts.QChartView(self.chart)
+		self._chart_view = QtCharts.QtCharts.QChartView(self.chart)
 		self._chart_view.setRenderHint(QtGui.QPainter.Antialiasing)
 
 		layout = QtWidgets.QVBoxLayout()
@@ -72,7 +72,7 @@ class AnalysisWindow(QtWidgets.QWidget):
 			print(res)
 	
 	def initPieChart(self):
-		self.chart_data = QtCharts.QPieSeries()
+		self.chart_data = QtCharts.QtCharts.QPieSeries()
 		self.updateChart = self.updatePieChart
 
 	def updatePieChart(self, res):
@@ -81,8 +81,8 @@ class AnalysisWindow(QtWidgets.QWidget):
 	
 	def initBarChart(self):
 		self.check_labels = False
-		self.chart_data = QtCharts.QHorizontalBarSeries()
-		self.chart.setAnimationOptions(QtCharts.QChart.SeriesAnimations)
+		self.chart_data = QtCharts.QtCharts.QHorizontalBarSeries()
+		self.chart.setAnimationOptions(QtCharts.QtCharts.QChart.SeriesAnimations)
 
 		self.updateChart = self.updateHorizontalBarChart
 	
@@ -94,19 +94,19 @@ class AnalysisWindow(QtWidgets.QWidget):
 		
 		print(predictions)
 
-		data = QtCharts.QBarSet("Confidence")
+		data = QtCharts.QtCharts.QBarSet("Confidence")
 		data.append(predictions)
 		self.chart_data.clear()
 		self.chart_data.append(data)
 		
 		if self.check_chart_displayed == False:
-			self.axisY = QtCharts.QBarCategoryAxis()
+			self.axisY = QtCharts.QtCharts.QBarCategoryAxis()
 			self.axisY.append(res['signalNames'])
 			self.chart.addAxis(self.axisY, QtCore.Qt.AlignLeft)
 			self.chart_data.attachAxis(self.axisY)
 			self.check_chart_displayed = True
 
-			self.axisX = QtCharts.QValueAxis()
+			self.axisX = QtCharts.QtCharts.QValueAxis()
 			self.axisX.setRange(0, 100)
 			self.chart.addAxis(self.axisX, QtCore.Qt.AlignBottom)
 			self.chart_data.attachAxis(self.axisX)

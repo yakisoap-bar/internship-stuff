@@ -1,5 +1,5 @@
 import sys, threading
-from PySide6 import QtCore, QtWidgets, QtGui, QtCharts
+from PySide2 import QtCore, QtWidgets, QtGui, QtCharts
 
 from app.analysis import Worker, AnalysisWindow
 
@@ -286,7 +286,7 @@ class mainWindow(QtWidgets.QMainWindow):
 def main():
 	app = QtWidgets.QApplication([])
 	GUI = mainWindow()
-	sys.exit(app.exec())
+	sys.exit(app.exec_())
 
 if __name__ == "__main__":
 	main()
