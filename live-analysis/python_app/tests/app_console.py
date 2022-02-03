@@ -62,8 +62,8 @@ def main():
 	# args = parser.parse_args()
 
 	device_connect()
-	doStuff()
-	# print(getBatteryStatus())
+	# doStuff()
+	print(getBatteryStatus())
 
 	# # Check parsed arguments
 	# if args.battery:

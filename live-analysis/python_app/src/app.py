@@ -263,7 +263,6 @@ class mainWindow(QtWidgets.QMainWindow):
 		self.get_batt_charge = QtWidgets.QLabel(f'Charging: {batt_plugged}')
 		self.bottom_bar.addWidget(self.get_batt_label)
 		self.bottom_bar.addWidget(self.get_batt_charge)
-		# self.get_batt_btn.clicked.connect(self.btnGetBattPressed)
 
 	def btnGetBattPressed(self):
 		self.get_batt_btn.setText(str(self.getBatt()))
