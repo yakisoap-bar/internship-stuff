@@ -9,3 +9,7 @@ __pycache__
 env
 Tektronix
 /training_notebooks/output.txt
+
+# distribution things
+dist/
+Live_Signal_Classifier.egg-info
