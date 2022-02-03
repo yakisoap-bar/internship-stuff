@@ -108,7 +108,8 @@ app.post('/predict', (req, res) => {
         res.status(200).send({
             'message' : 'Prediction successful.',
             'signalNames' : signalNames,
-            'predictions' : predictions
+            'predictions' : predictions,
+            'filtered' : filter
         })
     }).catch(err => {
         console.log(err);
