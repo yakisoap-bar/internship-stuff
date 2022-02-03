@@ -82,22 +82,33 @@ class AnalysisWindow(QtWidgets.QWidget):
 	def initBarChart(self):
 		self.check_labels = False
 		self.chart_data = QtCharts.QtCharts.QHorizontalBarSeries()
-		self.chart.setAnimationOptions(QtCharts.QtCharts.QChart.SeriesAnimations)
+		# self.chart.setAnimationOptions(QtCharts.QtCharts.QChart.SeriesAnimations)
 
 		self.updateChart = self.updateHorizontalBarChart
 	
+	def setBarColour(self, filter_res):
+		# Need to check the filter status on recv rather than on local or the update of colours lag
+		if filter_res:
+			# Set Green
+			self.data.setColor(QtGui.QColor("#369c5c"))
+		else:
+			# Set Blue
+			self.data.setColor(QtGui.QColor("#4271b8"))
+
 	def updateHorizontalBarChart(self, res):
 		# Round predictions
 		predictions = res['predictions']
+		filter_res = res['filtered']
 		for i in range(len(predictions)):
 			predictions[i] = round(predictions[i]*100, 2)
 		
 		print(predictions)
 
-		data = QtCharts.QtCharts.QBarSet("Confidence")
-		data.append(predictions)
+		self.data = QtCharts.QtCharts.QBarSet("Confidence")
+		self.data.append(predictions)
+		self.setBarColour(filter_res)
 		self.chart_data.clear()
-		self.chart_data.append(data)
+		self.chart_data.append(self.data)
 		
 		if self.check_chart_displayed == False:
 			self.axisY = QtCharts.QtCharts.QBarCategoryAxis()
@@ -116,7 +127,7 @@ class AnalysisWindow(QtWidgets.QWidget):
 
 		else:
 			self.axisX.applyNiceNumbers()
-
+	
 class Worker(QtCore.QObject):
 	started = QtCore.Signal()
 	graphData = QtCore.Signal(object)

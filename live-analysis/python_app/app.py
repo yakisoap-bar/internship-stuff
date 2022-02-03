@@ -77,7 +77,7 @@ class mainWindow(QtWidgets.QMainWindow):
 		# print(QtWidgets.QWidget.minimumWidth())
 
 	def buttons(self):
-		# Stick all buttons here
+		# Init all buttons here
 		self.btnRunAnalysis()
 		self.btnShowConfigs()
 		self.labelGetBatt()
