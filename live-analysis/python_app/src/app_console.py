@@ -26,7 +26,7 @@ def doStuff():
 
 		# print([predictions["signalNames"], predictions["predictions"]])
 
-def main():
+def parseArguments():
 	parser = argparse.ArgumentParser(description='Do the application')
 	parser.add_argument('-v', '--verbose',
 						action='store_true', dest="verbose",
@@ -59,20 +59,12 @@ def main():
 						nargs='?', type=str,
 						help="Specify configuration file.")
 
-	# args = parser.parse_args()
+	return parser.parse_args()
 
+def main():
+	args = parseArguments()
 	device_connect()
-	# doStuff()
 	print(getBatteryStatus())
-
-	# # Check parsed arguments
-	# if args.battery:
-	# 	print(getBatteryStatus())
-	# 	exit()
-	
-	# if checkArgs():
-	# 	doStuff(args)
-	
 	exit()
 
 if __name__ == '__main__':
