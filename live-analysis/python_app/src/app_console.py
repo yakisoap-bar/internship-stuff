@@ -35,7 +35,7 @@ def parseArgs():
 						help="Set sampling frequency")
 	parser.add_argument('--conf',
 						dest="conFile", metavar="configFile",
-						nargs='?', type=str,
+						nargs='?', default='parameters.conf', type=str,
 						help="Specify configuration file.")
 
 	return parser.parse_args()
@@ -43,12 +43,11 @@ def parseArgs():
 def checkArgs(args):
 	if args.configFile:
 		pass
-		return True
 	else:
-		return False
+		pass
 
-def readConf(filename):
-	with open(filename, 'r') as f:
+def readConf():
+	with open(args.filename, 'r') as f:
 		conf = str(f)
 	conf.split()
 
