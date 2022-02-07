@@ -1,4 +1,5 @@
-from PySide2 import QtCore, QtWidgets, QtGui, QtCharts
+from audioop import mul
+from PyQt5 import QtCore, QtWidgets, QtGui, QtCharts
 
 from Functions.Collect import *
 from Functions.Request import *
@@ -7,9 +8,9 @@ from Functions.Status import *
 class MainWindow(QtWidgets.QMainWindow):
 	def __init__(self) -> None:
 		super().__init__()
+
 		# Global vars
 		# self.worker = Worker()
-
 		self.analysis_window = None
 		self.main_layout = QtWidgets.QGridLayout()
 		self.prediction_layout = QtWidgets.QHBoxLayout()
@@ -24,6 +25,7 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.check_chart_displayed = False
 		self.check_filter = True	
 
+		# Go do the math
 		self.multipliers = {
 			"khz": 1e3,
 			"mhz": 1e6,
@@ -33,12 +35,16 @@ class MainWindow(QtWidgets.QMainWindow):
 		# Default analyzing params
 		self.params = {
 			"num_records": 10,
-			"cf": 2.44e9,
+			"cf": 2440e6, # Center Frequency
+			"cfVal": 2440,
+			"cfMultiplier": "mhz",
 			"sample_rate": 0,
 			"ref_level": 0,
-			"bandwidth": 40e6,
+			"bw": 40e6, # Bandwidth
+			"bwVal": 40,
+			"bwMultiplier": "khz",
 			"record_length": 1024,
-			"check_filter": True
+			"check_filter": True,
 		}
 
 		self.configs()
@@ -47,7 +53,7 @@ class MainWindow(QtWidgets.QMainWindow):
 	
 	@QtCore.Slot()
 	def configs(self):
-		# App config things
+		# init app configs
 		screen_size = self.getScreenRes()
 		# self.setGeometry(0, 0, screen_size.width(), screen_size.height())
 		self.window_title = "Live Classification"
@@ -148,48 +154,45 @@ class MainWindow(QtWidgets.QMainWindow):
 			check = False
 
 		self.params['check_filter'] = check
+	
+	def calcMultiplier(self, freq):
+		return self.params[freq]*self.multipliers[multi]
 
 	def configBandwidth(self):
 		self.bandwidth_label = QtWidgets.QLabel("Bandwidth")
 		self.bandwidth_input = QtWidgets.QLineEdit()
+		self.bandwidth_input.setText(str(self.params['bwVal']))
 		self.bandwidth_input.textChanged.connect(self.configBandwidthInputModified)
 
 		self.bandwidth_dropdown = QtWidgets.QComboBox()
 		self.bandwidth_dropdown.addItems(["khz", "mhz"])
-		self.bwMultiplier = self.multipliers["khz"]
-		self.bandwidth_dropdown.currentTextChanged.connect(self.configBWMultiplier)
 
-		self.bandwidth_input.setText(str(self.params['bandwidth']/self.bwMultiplier))
-	
 	def configBWMultiplier(self, multiplier):
-		self.bwMultiplier = self.multipliers[multiplier]
+		self.params["bwMultiplier"] = multiplier;
 	
 	def configBandwidthInputModified(self, bw_input):
 		try:
-			self.params['bandwidth'] = float(bw_input)*self.bwMultiplier
+			self.params['bwVal'] = float(bw_input)
 		except ValueError:
-			self.params['bandwidth'] = 0
+			pass
 	
 	def configCF(self):
 		self.cf_label = QtWidgets.QLabel("Center Frequency")
 		self.cf_input = QtWidgets.QLineEdit()
-		self.cf_input.textChanged.connect(self.configCFInputModified)
+		self.cf_input.setText(str(self.params['cfVal']))
 
 		self.cf_dropdown = QtWidgets.QComboBox()
 		self.cf_dropdown.addItems(["mhz", "ghz"])
-		self.cfMultiplier = self.multipliers['mhz']
 		self.cf_dropdown.currentTextChanged.connect(self.configCFMultiplier)
 
-		self.cf_input.setText(str(self.params['cf']/self.cfMultiplier))
-	
 	def configCFMultiplier(self, multiplier):
-		self.cfMultiplier = self.multipliers[multiplier]
+		self.params['cfMultiplier'] = multiplier
 	
 	def configCFInputModified(self, cf_input):
 		try:
-			self.params['cf'] = float(cf_input)*self.cfMultiplier
+			self.params['cfVal'] = float(cf_input)
 		except ValueError:
-			self.params['cf'] = 0
+			pass
 
 	def configSamplingFreq(self):
 		self.sampling_freq_label = QtWidgets.QLabel("Sampling Frequency")
@@ -321,6 +324,11 @@ class AnalysisWindow(QtWidgets.QWidget):
 			self.runAnalysisThread()
 	
 	def updateParams(self, params):
+		# Calculate cf and bw with multipliers
+		self.params["cf"] = self.params["cfVal"]*(self.multipliers[self.params['cfMultiplier']])
+		self.params["bw"] = self.params["bwVal"]*(self.multipliers[self.params['bwMultiplier']])
+
+		# Update params in analysis class
 		self.params = params
 
 	def runAnalysisThread(self):
@@ -415,7 +423,7 @@ class Worker(QtCore.QObject):
 	def runAnalysis(self):
 		self.started.emit()
 		# Predict
-		config_block_iq(self.params['cf'], self.params['ref_level'], self.params['bandwidth'], self.params['record_length'], self.params['sample_rate'])
+		config_block_iq(self.params['cf'], self.params['ref_level'], self.params['bw'], self.params['record_length'], self.params['sample_rate'])
 		data = acquire_block_iq(1024, self.params["num_records"])
 		predictions = predict_post('http://localhost:3000/predict', data, self.params['cf'], self.params['check_filter'])
 		print(predictions)
