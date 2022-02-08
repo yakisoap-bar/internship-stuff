@@ -14,7 +14,6 @@ class TerminalApp():
 	
 	def globalVars(self):
 		'''Init vars'''
-		self.params = {}
 		self.backendURL = 'http://localhost:3000/predict'
 
 	def parseArgs(self):
@@ -39,35 +38,49 @@ class TerminalApp():
 		return parser.parse_args()
 
 	def run(self):
-		signal = self.SDR.collect_iq()
-		predict_post(self.backendURL, signal, self.params['centerFreq'], self.params['filter_check'])
+		# Check if params changed and update if yes
+		params = self.readConf()
+		if params != self.params():
+			self.params = params
+			self.SDR.config(self.params)
+
+		data = self.SDR.collect_iq()
+		predictions = predict_post(self.backendURL, data, self.params['centerFreq'], self.params['filter_check'])
 	
 	def checkArgs(self):
 		'''Additional check for argparser arguments'''
-		self.readConf()
+		self.params = self.readConf()
 		
 	def readConf(self):
-		'''Load and parse config file'''
+		'''
+		Load and parse config file
+		returns params
+		'''
+
 		# Read default configs
 		config = configparser.ConfigParser()
 		config.read(config, self.args.conf_file)
-		self.parseConfig('DEFAULT')
+		params = self.parseConfig('DEFAULT')
 		
 		if self.args.signal in self.config.sections():
 			signal_name = (self.args.signal).upper()
-			self.parseConfig(config, signal_name)
+			params = self.parseConfig(config, signal_name, params)
+		
+		return params
 	
-	def parseConfig(self, config, key):
+	def parseConfig(self, config, key, params={}):
 		'''
-		Parses config file items into proper types and add them to self.params	
+		Parses config file items into proper types
+		returns dict of params
 
 		PARAMETERS:
 		config: Loaded config file
 		key: key to load from config file
+		params: if given, updates params
 		'''
 		# Define types
-		intParams = ["RefLevel", "numRecords", "samplingFreq", "centerFreq", "bandwidth"]
-		boolParams = ["filterCheck"]
+		intParams = ["ref_level", "num_records", "sampleing_rate", "center_freq", "rx_bandwidth"]
+		boolParams = ["filter_check"]
 
 		for setting in config[key]:
 			item = config[key][setting]
@@ -78,7 +91,9 @@ class TerminalApp():
 			elif key in boolParams:
 				item = bool(item)
 			
-			self.params[setting] = item
+			params[setting] = item
+		
+		return params
 		
 	def initSDR(self):
 		'''Init SDR'''
