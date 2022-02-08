@@ -20,10 +20,12 @@ class PlutoSDR():
         # set default parameters
         self.__r_length = r_length
         self.__n_records = n_records
-        self.__sdr.rx_hardwaregain_chan0 = 'fast_attack'    # set sdr gain
+        self.__sdr.gain_control_mode_chan0 = 'fast_attack'  # set gain mode
+        self.__sdr.rx_hardwaregain_chan0 = 50               # set sdr gain (only applicable if param above is manual)
+        
         self.__sdr.sample_rate = int(56e6)                  # set sampling rate
 
-        self.__sdr.rx_buffer_size = r_length * n_records        # set record(s) length
+        self.__sdr.rx_buffer_size = r_length * n_records    # set record(s) length
         self.__sdr.rx_lo = cf                               # set center frequency
         self.__sdr.rx_rf_bandwidth = rbw                    # set receiving bandwidth
 
@@ -76,18 +78,53 @@ class PlutoSDR():
         iq_data_processed = np.reshape(np.array([np.real(iq_data_raw), np.imag(iq_data_raw)]),
                             (int(self.__sdr.rx_buffer_size / self.__r_length), 2, self.__r_length))
 
+        # normalise the records
+        norm = np.linalg.norm(iq_data_processed)
+        iq_data_processed /= norm
+
         return iq_data_processed
 
-sdr = PlutoSDR()
+# from Functions.Request import *
 
-sdr.config({
-    'sampling_rate' : 56e6, 
-    'num_records' : 20, 
-    'center_freq' : 4e9, 
-    'rx_bandwidth' : 30e6,
-    'r_length' : 512
-    })
+def main():
+    # TESTING
+    import matplotlib.pyplot as plt
 
-print(sdr.config())
+    sdr = PlutoSDR()
 
-print(sdr.collect_iq().shape)
+    sdr.config({
+        'sampling_rate' : 56e6, 
+        'num_records' : 10, 
+        'center_freq' : 98.7e6, 
+        'rx_bandwidth' : 1e6,
+        'r_length' : 1024
+        })
+
+    print(sdr.config())
+
+    # for i in range(100):
+    #     sample = sdr.collect_iq().tolist()
+
+    #     preds = predict_post('http://192.168.1.81:3000/predict', sample, 98.7e6, False)
+
+    #     if i == 0:
+    #         print(*preds[1]['signalNames'], sep='\t')
+
+    #     print(*np.round(preds[1]['predictions'], 5), sep='\t') 
+
+    sample = sdr.collect_iq().tolist()
+    print('collection done.')
+
+    fig = plt.figure(1, figsize=(25, 20))
+
+    for i in range(10):
+        ax = fig.add_subplot(10, 1, i+1)
+        
+        ax.plot(sample[i][0])
+        ax.plot(sample[i][1])
+    fig.savefig(f'./testing_grounds/temps/temp.png', bbox_inches='tight')
+    print(f'figure saved.')
+
+
+if __name__ == '__main__':
+    main()
