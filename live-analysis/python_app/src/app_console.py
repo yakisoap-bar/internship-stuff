@@ -4,56 +4,59 @@ from mimetypes import init
 
 class TerminalApp():
 	def __init__(self) -> None:
+		self.globalVars()
 		self.args = self.parseArgs()
 		self.checkArgs()
+	
+	def globalVars(self):
+		# Init vars
+		self.parameters = {}
 
 	def parseArgs(self):
 		parser = argparse.ArgumentParser(description='Do the application')
 		parser.add_argument('-v', '--verbose',
 							action='store_true', dest="verbose",
 							help='Display additional output and current configurations')
-		parser.add_argument('--battery',
+		parser.add_argument('-b', '--batt',
 							action='store_true', dest="battery",
 							help='Check battery level')
-		parser.add_argument('-f', '--centerfreq',
-							dest="cf", metavar="centerFreq",
-							nargs='?', default=2.44e9, type=int,
-							help="Set center frequency")
-		parser.add_argument('-r', '--reflevel',
-							dest="refLevel", metavar="refLevel",
-							nargs='?', default=0, type=int,
-							help="Set reference level")
-		parser.add_argument('-b', '--bandwidth',
-							dest="bw", metavar="bandwidth",
-							nargs='?', default=40e6, type=int,
-							help="Set bandwidth")
-		parser.add_argument('-n', '--records',
-							dest="numRecords", metavar="numRecords",
-							nargs='?', default=10, type=int,
-							help="Determine number of records")
-		parser.add_argument('-s', '--sampfreq',
-							dest="sampFreq", metavar="samplingFrequency",
-							nargs='?', default=40, type=int,
-							help="Set sampling frequency")
-		parser.add_argument('--conf',
-							dest="conFile", metavar="configFile",
-							nargs='?', default='parameters.conf', type=str,
+		parser.add_argument('-c', '--conf',
+							dest="conf_file", metavar="configFile",
+							nargs='?', default='params.conf', type=str,
 							help="Specify configuration file.")
+		parser.add_argument('-s', '--signal',
+							dest="signal", metavar="configFile",
+							nargs='?', type=str,
+							help="Select default signal parameters")
+		# TODO: List saved signals
 	
 		return parser.parse_args()
+
+	def run(self):
+		pass
 	
-	def checkArgs(args):
-		if args.configFile:
-			pass
-		else:
-			pass
+	def checkArgs(self):
+		self.readConf()
 		
 	def readConf(self):
-		with open(self.args.filename, 'r') as f:
-			conf = str(f)
-		conf.split()
+		# Read default configs
+		config = configparser.ConfigParser()
+		config.read(self.args.conf_file)
+		for setting in config['DEFAULT']:
+			self.parameters[setting] = config['DEFAULT'][setting]
+		
+		if self.args.signal != None:
+			signal_name = (self.args.signal).upper()
+			for setting in config[signal_name]:
+				self.parameters[setting] = config[signal_name][setting]
 	
-	def run():
+	def getSignals():
+		pass
+
+	def sendSignals():
+		pass
+	
+	def displayPredictions():
 		pass
 
 def main():
