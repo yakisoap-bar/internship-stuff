@@ -8,14 +8,27 @@ from Functions.Request import predict_post
 class TerminalApp():
 	def __init__(self) -> None:
 		self.globalVars()
+		
+		# Parse args
 		self.args = self.parseArgs()
 		self.checkArgs()
+
+		self.params = self.readConf()
 		self.initSDR()
 	
 	def globalVars(self):
 		'''Init vars'''
+		self.run_count = 0
 		self.backendURL = 'http://localhost:3000/predict'
-
+	
+	def run(self):
+		self.predict()
+		self.genBarChart()
+		
+		if self.run_count != 1:
+			self.run_count -= 1
+			self.run()
+		
 	def parseArgs(self):
 		'''argparse'''
 		parser = argparse.ArgumentParser(description='Do the application')
@@ -33,24 +46,19 @@ class TerminalApp():
 							dest="signal", metavar="configFile",
 							nargs='?', type=str,
 							help="Select default signal parameters")
+		parser.add_argument('-r', '--run',
+							dest="run_count", metavar="configFile",
+							nargs='?', type=int,
+							help="Select default signal parameters")
 		# TODO: List saved signals
 	
 		return parser.parse_args()
 
-	def run(self):
-		# Check if params changed and update if yes
-		params = self.readConf()
-		if params != self.params():
-			self.params = params
-			self.SDR.config(self.params)
-
-		data = self.SDR.collect_iq()
-		predictions = predict_post(self.backendURL, data, self.params['centerFreq'], self.params['filter_check'])
-	
 	def checkArgs(self):
 		'''Additional check for argparser arguments'''
-		self.params = self.readConf()
-		
+		if self.args.run_count != None:
+			self.run_count = self.args.run_count
+
 	def readConf(self):
 		'''
 		Load and parse config file
@@ -79,7 +87,7 @@ class TerminalApp():
 		params: if given, updates params
 		'''
 		# Define types
-		intParams = ["ref_level", "num_records", "sampleing_rate", "center_freq", "rx_bandwidth"]
+		intParams = ["ref_level", "num_records", "sampling_rate", "center_freq", "rx_bandwidth"]
 		boolParams = ["filter_check"]
 
 		for setting in config[key]:
@@ -95,13 +103,35 @@ class TerminalApp():
 		
 		return params
 		
+	def predict(self):
+		'''
+		Send signals and return predictions
+		'''
+		self.updateConfigs()
+		data = self.SDR.collect_iq()
+		predictions = predict_post(self.backendURL, data, self.params['centerFreq'], self.params['filter_check'])
+		
+		return predictions
+	
+	def genBarChart(self):
+		# TODO visualise predictions
+		pass
+
 	def initSDR(self):
 		'''Init SDR'''
 		self.SDR = PlutoSDR()
 		self.SDR.initConfig(self.params['centerFreq'], self.params['bandwidth'], self.params['numRecords'])
 	
+	def updateConfigs(self):
+		'''Update SDR configs, if empty, no change'''
+		params = self.readConf()
+		if params != self.params():
+			self.params = params
+			self.SDR.config(self.params)
+
 def main():
 	app = TerminalApp()
+	app.run()
 	exit()
 
 if __name__ == '__main__':
