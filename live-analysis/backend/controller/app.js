@@ -43,7 +43,7 @@ app.post('/predict', (req, res) => {
     // check if frequency is passed
     if (frequency == null) {
         return res.status(500).send({'message' : 'Error: Frequency not passed.'});
-    }
+    };
 
     // check if toggle is passed
 
