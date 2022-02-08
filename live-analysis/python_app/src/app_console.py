@@ -2,15 +2,18 @@
 import argparse, configparser
 from mimetypes import init
 
+from Functions.plutoSDR import PlutoSDR
+
 class TerminalApp():
 	def __init__(self) -> None:
 		self.globalVars()
 		self.args = self.parseArgs()
 		self.checkArgs()
+		self.initSDR()
 	
 	def globalVars(self):
 		# Init vars
-		self.parameters = {}
+		self.params = {}
 
 	def parseArgs(self):
 		parser = argparse.ArgumentParser(description='Do the application')
@@ -43,20 +46,25 @@ class TerminalApp():
 		config = configparser.ConfigParser()
 		config.read(self.args.conf_file)
 		for setting in config['DEFAULT']:
-			self.parameters[setting] = config['DEFAULT'][setting]
+			self.params[setting] = config['DEFAULT'][setting]
 		
 		if self.args.signal != None:
 			signal_name = (self.args.signal).upper()
 			for setting in config[signal_name]:
-				self.parameters[setting] = config[signal_name][setting]
+				self.params[setting] = config[signal_name][setting]
 	
-	def getSignals():
+	def initSDR(self):
+		# Init SDR
+		self.SDR = PlutoSDR()
+		self.SDR.initConfig(self.params['centerFreq'], self.params['bandwidth'], self.params['numRecords'])
+	
+	def getSignals(self):
 		pass
 
-	def sendSignals():
+	def sendSignals(self):
 		pass
 	
-	def displayPredictions():
+	def displayPredictions(self):
 		pass
 
 def main():

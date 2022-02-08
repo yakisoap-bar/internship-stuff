@@ -14,9 +14,10 @@ class PlutoSDR():
     r_length: the number of samples per record to collect
     '''
 
-    def __init__(self, ip='192.168.2.1', cf=int(2.44e9), rbw=int(40e6), n_records=10, r_length=1024):
+    def __init__(self, ip='192.168.2.1'): 
         self.__sdr = adi.Pluto('ip:' + ip)
 
+    def initConfig(self, cf=int(2.44e9), rbw=int(40e6), n_records=10, r_length=1024):
         # set default parameters
         self.__r_length = r_length
         self.__n_records = n_records
