@@ -13,11 +13,12 @@ class TerminalApp():
 		self.initSDR()
 	
 	def globalVars(self):
-		# Init vars
+		'''Init vars'''
 		self.params = {}
 		self.backendURL = 'http://localhost:3000/predict'
 
 	def parseArgs(self):
+		'''argparse'''
 		parser = argparse.ArgumentParser(description='Do the application')
 		parser.add_argument('-v', '--verbose',
 							action='store_true', dest="verbose",
@@ -42,25 +43,34 @@ class TerminalApp():
 		predict_post(self.backendURL, signal, self.params['centerFreq'], self.params['filter_check'])
 	
 	def checkArgs(self):
+		'''Additional check for argparser arguments'''
 		self.readConf()
 		
 	def readConf(self):
+		'''Load and parse config file'''
 		# Read default configs
-		self.config = configparser.ConfigParser()
-		self.config.read(self.args.conf_file)
+		config = configparser.ConfigParser()
+		config.read(config, self.args.conf_file)
 		self.parseConfig('DEFAULT')
 		
 		if self.args.signal in self.config.sections():
 			signal_name = (self.args.signal).upper()
-			self.parseConfig(signal_name)
+			self.parseConfig(config, signal_name)
 	
-	def parseConfig(self, key):
+	def parseConfig(self, config, key):
+		'''
+		Parses config file items into proper types and add them to self.params	
+
+		PARAMETERS:
+		config: Loaded config file
+		key: key to load from config file
+		'''
 		# Define types
 		intParams = ["RefLevel", "numRecords", "samplingFreq", "centerFreq", "bandwidth"]
 		boolParams = ["filterCheck"]
 
-		for setting in self.config[key]:
-			item = self.config[key][setting]
+		for setting in config[key]:
+			item = config[key][setting]
 
 			# type conversion
 			if key in intParams:
@@ -70,9 +80,8 @@ class TerminalApp():
 			
 			self.params[setting] = item
 		
-	
 	def initSDR(self):
-		# Init SDR
+		'''Init SDR'''
 		self.SDR = PlutoSDR()
 		self.SDR.initConfig(self.params['centerFreq'], self.params['bandwidth'], self.params['numRecords'])
 	
