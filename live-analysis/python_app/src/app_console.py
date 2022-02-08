@@ -3,6 +3,7 @@ import argparse, configparser
 from mimetypes import init
 
 from Functions.plutoSDR import PlutoSDR
+from Functions.Request import predict_post
 
 class TerminalApp():
 	def __init__(self) -> None:
@@ -14,6 +15,7 @@ class TerminalApp():
 	def globalVars(self):
 		# Init vars
 		self.params = {}
+		self.backendURL = 'http://localhost:3000/predict'
 
 	def parseArgs(self):
 		parser = argparse.ArgumentParser(description='Do the application')
@@ -36,40 +38,46 @@ class TerminalApp():
 		return parser.parse_args()
 
 	def run(self):
-		pass
+		signal = self.SDR.collect_iq()
+		predict_post(self.backendURL, signal, self.params['centerFreq'], self.params['filter_check'])
 	
 	def checkArgs(self):
 		self.readConf()
 		
 	def readConf(self):
 		# Read default configs
-		config = configparser.ConfigParser()
-		config.read(self.args.conf_file)
-		for setting in config['DEFAULT']:
-			self.params[setting] = config['DEFAULT'][setting]
+		self.config = configparser.ConfigParser()
+		self.config.read(self.args.conf_file)
+		self.parseConfig('DEFAULT')
 		
-		if self.args.signal != None:
+		if self.args.signal in self.config.sections():
 			signal_name = (self.args.signal).upper()
-			for setting in config[signal_name]:
-				self.params[setting] = config[signal_name][setting]
+			self.parseConfig(signal_name)
+	
+	def parseConfig(self, key):
+		# Define types
+		intParams = ["RefLevel", "numRecords", "samplingFreq", "centerFreq", "bandwidth"]
+		boolParams = ["filterCheck"]
+
+		for setting in self.config[key]:
+			item = self.config[key][setting]
+
+			# type conversion
+			if key in intParams:
+				item = float(item)
+			elif key in boolParams:
+				item = bool(item)
+			
+			self.params[setting] = item
+		
 	
 	def initSDR(self):
 		# Init SDR
 		self.SDR = PlutoSDR()
 		self.SDR.initConfig(self.params['centerFreq'], self.params['bandwidth'], self.params['numRecords'])
 	
-	def getSignals(self):
-		pass
-
-	def sendSignals(self):
-		pass
-	
-	def displayPredictions(self):
-		pass
-
 def main():
 	app = TerminalApp()
-	app.run()
 	exit()
 
 if __name__ == '__main__':
