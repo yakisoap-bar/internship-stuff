@@ -1,5 +1,5 @@
 {
-    "signalNames" : ["BT", "FM", "FNET", "LTE", "WIFI", "BNET"],
+    "signalNames" : ["BT", "FM", "FNET", "LTE", "WIFI", "BNET", "NOISE"],
 
     "freqBands" : {
         "VLF" : [3000, 30000], 
