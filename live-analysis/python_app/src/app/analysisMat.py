@@ -129,12 +129,10 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.show_configs_btn.clicked.connect(self.btnShowConfigsPressed)
 	
 	def btnShowConfigsPressed(self):
-		try:
-			self.analysis_window.updateParams(self.params)
-		except AttributeError:
-			pass
-		finally:
-			print(self.params)
+		# Calculate cf and bw with multipliers
+		self.params["cf"] = self.params["cfVal"]*(self.multipliers[self.params['cfMultiplier']])
+		self.params["bw"] = self.params["bwVal"]*(self.multipliers[self.params['bwMultiplier']])
+		print(self.params)
 	
 	def configFilter(self):
 		self.filter_label = QtWidgets.QLabel("Enable filtering")
