@@ -173,6 +173,7 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.cf_label = QtWidgets.QLabel("Center Frequency")
 		self.cf_input = QtWidgets.QLineEdit()
 		self.cf_input.setText(str(self.params['cfVal']))
+		self.cf_input.textChanged.connect(self.configCFInputModified)
 
 		self.cf_dropdown = QtWidgets.QComboBox()
 		self.cf_dropdown.addItems(["mhz", "ghz"])
