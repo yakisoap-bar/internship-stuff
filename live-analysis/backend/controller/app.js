@@ -16,7 +16,7 @@ app.use(cors());
 // prediction endpoint variables
 // load external variables
 let config = require('./config.json');
-const { index } = require('mathjs');
+const { index, sign } = require('mathjs');
 
 // load signal names from file
 let signalNames = config['signalNames'];
@@ -74,8 +74,9 @@ app.post('/predict', (req, res) => {
         "instances": records
     }).then(response => {
         // return correct results
-        predictions = response.data.predictions;
+        let predictions = response.data.predictions;
         predictions = math.mean(predictions, 0);
+        let filteredSignals = [];
 
         // filter results based on passed frequency
         if (filter) {
@@ -84,6 +85,7 @@ app.post('/predict', (req, res) => {
                 // identify correct frequency band from passed frequency
                 if ((freq[0] <= frequency && frequency < freq[1])) {
                     let signalsOnFreq = signalBands[name];
+                    filteredSignals = signalNames.filter(s => !signalsOnFreq.includes(s))
                     
                     if (signalsOnFreq != null) {
                         // get index positions of each signal in identified frequency band from prediction result order
@@ -109,7 +111,8 @@ app.post('/predict', (req, res) => {
             'message' : 'Prediction successful.',
             'signalNames' : signalNames,
             'predictions' : predictions,
-            'filtered' : filter
+            'filtered' : filter,
+            'filteredSignals' : filteredSignals
         })
     }).catch(err => {
         console.log(err);
