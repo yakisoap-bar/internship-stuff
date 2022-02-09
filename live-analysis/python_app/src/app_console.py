@@ -1,6 +1,7 @@
 # Libraries
 import argparse, configparser
-from mimetypes import init
+import matplotlib.pyplot as plt
+import numpy as np
 
 from Functions.plutoSDR import PlutoSDR
 from Functions.Request import predict_post
@@ -15,6 +16,9 @@ class TerminalApp():
 
 		self.params = self.readConf()
 		self.initSDR()
+
+		# bar chart variables
+		self.__barStarted = False
 	
 	def globalVars(self):
 		'''Init vars'''
@@ -64,16 +68,20 @@ class TerminalApp():
 		returns params
 		'''
 
-		# Read default configs
-		config = configparser.ConfigParser()
-		config.read(self.args.conf_file)
-		params = self.parseConfig(config, 'DEFAULT')
+		try:
+			# Read default configs
+			config = configparser.ConfigParser()
+			config.read(self.args.conf_file)
+			params = self.parseConfig(config, 'DEFAULT')
 		
-		if self.args.signal in config.sections():
-			signal_name = (self.args.signal).upper()
-			params = self.parseConfig(config, signal_name, params)
+			if self.args.signal in config.sections():
+				signal_name = (self.args.signal).upper()
+				params = self.parseConfig(config, signal_name, params)
 		
-		return params
+			return params
+
+		except: # When the file is still writing
+			return self.params
 	
 	def parseConfig(self, config, key, params={}):
 		'''
@@ -116,11 +124,34 @@ class TerminalApp():
 	def genBarChart(self, predictions):
 		# TODO visualise predictions
 		print(predictions)
-		pass
+
+		with plt.ion():
+			# check if bar chart has been initialised
+			if not self.__barStarted: # if chart is not initialised, create chart
+				self.__plotFigure = plt.figure(1, figsize=(10,len(predictions[1]['predictions'])))
+				self.__plotAxes = self.__plotFigure.add_axes([1, 1, 1, 1])
+				self.__plotAxes.set_xlim(left=0, right=1)
+				self.__barRects = self.__plotAxes.barh(predictions[1]['signalNames'], predictions[1]['predictions'])
+				self.__barStarted = True
+
+			else: # if chart is initialised, update chart
+				# assign var names for hidden attrs for sanity
+				fig = self.__plotFigure
+				ax = self.__plotAxes
+				rects = self.__barRects
+
+				ax.set_title(np.random.rand(1))
+
+				for rect, pred in zip(rects, predictions[1]['predictions']):
+					rect.set_width(pred)
+					plt.pause(0.01)
+
+		plt.draw()
 
 	def initSDR(self):
 		'''Init SDR'''
 		self.SDR = PlutoSDR()
+		print(self.params)
 		self.SDR.initConfig(self.params['center_freq'], self.params['rx_bandwidth'], self.params['num_records'])
 	
 	def updateConfigs(self):
@@ -128,7 +159,10 @@ class TerminalApp():
 		params = self.readConf()
 		if params != self.params:
 			self.params = params
-			self.SDR.config(self.params)
+			try:
+				self.SDR.config(self.params)
+			except: # Invalid config
+				pass
 
 def main():
 	app = TerminalApp()
