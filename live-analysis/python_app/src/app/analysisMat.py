@@ -1,5 +1,8 @@
 from audioop import mul
 from PyQt5 import QtCore, QtWidgets, QtGui
+;
+from Functions.plutoSDR import PlutoSDR
+from Functions.Request import predict_post
 
 class MainWindow(QtWidgets.QMainWindow):
 	def __init__(self) -> None:
@@ -41,6 +44,7 @@ class MainWindow(QtWidgets.QMainWindow):
 			"bwMultiplier": "khz",
 			"record_length": 1024,
 			"check_filter": True,
+			"server_ip": '13.76.137.1'
 		}
 
 		self.configs()
@@ -59,6 +63,7 @@ class MainWindow(QtWidgets.QMainWindow):
 		iconLocation = './img/networkneural.png'
 		icon.addPixmap(QtGui.QPixmap(iconLocation), QtGui.QIcon.Selected, QtGui.QIcon.On)
 		self.setWindowIcon(icon)
+		self.initSDR()
 	
 	def appLayout(self):
 		self.menuToolbar()
@@ -132,6 +137,7 @@ class MainWindow(QtWidgets.QMainWindow):
 		# Calculate cf and bw with multipliers
 		self.params["cf"] = self.params["cfVal"]*(self.multipliers[self.params['cfMultiplier']])
 		self.params["bw"] = self.params["bwVal"]*(self.multipliers[self.params['bwMultiplier']])
+
 		print(self.params)
 	
 	def configFilter(self):
@@ -244,15 +250,61 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.bottom_bar.addWidget(self.get_batt_label)
 		self.bottom_bar.addWidget(self.get_batt_charge)
 
-	def btnGetBattPressed(self):
-		self.get_batt_btn.setText(str(self.getBatt()))
+class MatPlotLibWindow(QtCore.QObject):
+	def __init__(self) -> None:
 
-	def connectSA(self):
-		if self.check_set_config_iq == False:
-			device_connect()
-			self.check_set_config_iq = True
+		self.analysis_thread = QtCore.QThread()
+		self.run_analysis_btn_check
 
-	def getBatt(self):
-		self.connectSA()
-		batt = getBatteryStatus()
-		return batt
+		self.initSDR()
+	
+	def initSDR(self):
+		self.SDR = PlutoSDR()
+		self.SDR.initConfig(self.params['center_freq'], self.params['rx_bandwidth'], self.params['num_records'])
+
+	def runAnalysisThread(self):
+		self.worker = Worker(self.params) # init thread
+		self.worker.moveToThread(self.analysis_thread)
+		self.analysis_thread.started.connect(self.worker.runAnalysis)
+		self.analysis_thread.start()
+		self.worker.graphData.connect(self.updateGraph)
+		self.worker.finished.connect(self.runAnalysisRecursion)
+
+	def runAnalysisRecursion(self):
+		'''Check if loop should stop'''
+		self.analysis_thread.quit()
+		self.worker.deleteLater()
+		if self.run_state:
+			self.runAnalysisThread()
+	
+	def updateGraph(self):
+		'''Update data for graph'''
+		pass
+
+	def updateAnalysisCheck(self, check):
+		'''Update status, whether to run or not'''
+		self.run_state = check
+
+class Worker(QtCore.QObject):
+	started = QtCore.Signal()
+	graphData = QtCore.Signal(object)
+	finished = QtCore.Signal()
+
+	def __init__(self, SDR, params) -> None:
+		super().__init__()
+		self.SDR = SDR
+		self.params = params
+
+	def runAnalysis(self):
+		self.started.emit()
+		predictions = self.predict()
+		self.graphData.emit(predictions)
+		self.finished.emit()
+
+	def predict(self):
+		data = self.SDR.collect_iq()
+		url = 'http://' + self.params['server_ip'] + ':3000/predict'
+		predictions = predict_post(url, data, self.params['center_freq'], self.params['filter_check'])
+
+		return predictions
+	
