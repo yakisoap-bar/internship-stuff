@@ -7,17 +7,29 @@ class Plotter():
 
     def __init__(self):
         self.__bar_started = False
-    
-    def isStarted(self):
-        return self.__bar_started
 
-    def eventWindowClosed(self):
+    def __eventWindowClosed(self):
+        '''
+        Event hook for when chart window is closed. Should not be publicly accessed.
+        '''
+
         print('closing window')
         self.__bar_started = False
 
+    def isStarted(self):
+        '''
+        Method to check if a window is open
+        '''
+
+        return self.__bar_started
+
     def closeWindow(self):
+        '''
+        Method to programatically close chart window.
+        '''
+
         plt.close('all')
-        self.eventWindowClosed()
+        self.__eventWindowClosed()
 
     def drawChart(self, predictions):
         '''
@@ -38,7 +50,7 @@ class Plotter():
             plt.ion()
 
             self.__plot_figure = plt.figure(1, figsize=(10,7))
-            self.__plot_figure.canvas.mpl_connect('close_event', self.eventWindowClosed)
+            self.__plot_figure.canvas.mpl_connect('close_event', self.__eventWindowClosed)
 
             self.__plot_axes = self.__plot_figure.add_subplot(111)
             self.__plot_axes.set_xlim(left=0, right=1)
