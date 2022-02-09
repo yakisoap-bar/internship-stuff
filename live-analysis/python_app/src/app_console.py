@@ -19,10 +19,11 @@ class TerminalApp():
 	def globalVars(self):
 		'''Init vars'''
 		self.run_count = 0
+		self.backendURL = 'http://localhost:3000/predict'
 	
 	def run(self):
-		predictions = self.predict()
-		self.genBarChart(predictions)
+		self.predict()
+		self.genBarChart()
 		
 		if self.run_count != 1:
 			self.run_count -= 1
@@ -42,11 +43,11 @@ class TerminalApp():
 							nargs='?', default='params.conf', type=str,
 							help="Specify configuration file.")
 		parser.add_argument('-s', '--signal',
-							dest="signal", metavar="signal",
+							dest="signal", metavar="configFile",
 							nargs='?', type=str,
 							help="Select default signal parameters")
 		parser.add_argument('-r', '--run',
-							dest="run_count", metavar="run_count",
+							dest="run_count", metavar="configFile",
 							nargs='?', type=int,
 							help="Select default signal parameters")
 		# TODO: List saved signals
@@ -66,10 +67,10 @@ class TerminalApp():
 
 		# Read default configs
 		config = configparser.ConfigParser()
-		config.read(self.args.conf_file)
+		config.read(config, self.args.conf_file)
 		params = self.parseConfig(config, 'DEFAULT')
 		
-		if self.args.signal in config.sections():
+		if self.args.signal in self.config.sections():
 			signal_name = (self.args.signal).upper()
 			params = self.parseConfig(config, signal_name, params)
 		
@@ -93,9 +94,9 @@ class TerminalApp():
 			item = config[key][setting]
 
 			# type conversion
-			if setting in intParams:
-				item = int(float(item))
-			elif setting in boolParams:
+			if key in intParams:
+				item = float(item)
+			elif key in boolParams:
 				item = bool(item)
 			
 			params[setting] = item
@@ -107,27 +108,25 @@ class TerminalApp():
 		Send signals and return predictions
 		'''
 		self.updateConfigs()
-		url = 'http://' + self.params['server_ip'] + ':3000/predict'
 		data = self.SDR.collect_iq()
-		predictions = predict_post(url, data, self.params['center_freq'], self.params['filter_check'])
+		predictions = predict_post(self.backendURL, data, self.params['centerFreq'], self.params['filter_check'])
 		
 		return predictions
 	
-	def genBarChart(self, predictions):
+	def genBarChart(self):
 		# TODO visualise predictions
-		print(predictions)
 		pass
 
 	def initSDR(self):
 		'''Init SDR'''
 		self.SDR = PlutoSDR()
-		self.SDR.initConfig(self.params['center_freq'], self.params['rx_bandwidth'], self.params['num_records'])
+		self.SDR.initConfig(self.params['centerFreq'], self.params['bandwidth'], self.params['numRecords'])
 	
 	def updateConfigs(self):
 		'''Update SDR configs, if empty, no change'''
-		tempParams = self.readConf()
-		if tempParams != self.params:
-			self.params = tempParams
+		params = self.readConf()
+		if params != self.params():
+			self.params = params
 			self.SDR.config(self.params)
 
 def main():
