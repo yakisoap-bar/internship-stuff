@@ -17,7 +17,7 @@ def predict_post(url, data, freq, filter_check):
     body = {'data' : data,
             'frequency' : freq,
             'filter' : filter_check}
-
+    
     # send request
     r = requests.post(url, json=body)
 
