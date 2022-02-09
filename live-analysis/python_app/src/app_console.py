@@ -125,26 +125,30 @@ class TerminalApp():
 		# TODO visualise predictions
 		print(predictions)
 
-		with plt.ion():
-			# check if bar chart has been initialised
-			if not self.__barStarted: # if chart is not initialised, create chart
-				self.__plotFigure = plt.figure(1, figsize=(10,len(predictions[1]['predictions'])))
-				self.__plotAxes = self.__plotFigure.add_axes([1, 1, 1, 1])
-				self.__plotAxes.set_xlim(left=0, right=1)
-				self.__barRects = self.__plotAxes.barh(predictions[1]['signalNames'], predictions[1]['predictions'])
-				self.__barStarted = True
+		# check if bar chart has been initialised
+		if not self.__barStarted: # if chart is not initialised, create chart
+			plt.ion()
 
-			else: # if chart is initialised, update chart
-				# assign var names for hidden attrs for sanity
-				fig = self.__plotFigure
-				ax = self.__plotAxes
-				rects = self.__barRects
+			self.__plotFigure = plt.figure(1, figsize=(10,len(predictions[1]['predictions'])))
+			self.__plotAxes = self.__plotFigure.add_subplot(111)
+			self.__plotAxes.set_xlim(left=0, right=1)
+			self.__barRects = self.__plotAxes.barh(
+				predictions[1]['signalNames'], 
+				predictions[1]['predictions'],
+				color='green' if predictions[1]['filtered'] else 'cyan'
+			)
+			self.__barStarted = True
 
-				ax.set_title(np.random.rand(1))
+		else: # if chart is initialised, update chart
+			ax = self.__plotAxes
+			rects = self.__barRects
 
-				for rect, pred in zip(rects, predictions[1]['predictions']):
-					rect.set_width(pred)
-					plt.pause(0.01)
+			ax.set_title(np.random.rand(1))
+
+			for rect, pred in zip(rects, predictions[1]['predictions']):
+				rect.set_width(pred)
+				rect.set(color='green')
+				plt.pause(0.01)
 
 		plt.draw()
 
