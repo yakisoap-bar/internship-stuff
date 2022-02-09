@@ -1,10 +1,6 @@
 from audioop import mul
 from PyQt5 import QtCore, QtWidgets, QtGui
 
-from Functions.Collect import *
-from Functions.Request import *
-from Functions.Status import *
-
 class MainWindow(QtWidgets.QMainWindow):
 	def __init__(self) -> None:
 		super().__init__()
