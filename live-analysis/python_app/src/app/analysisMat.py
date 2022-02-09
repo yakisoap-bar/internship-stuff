@@ -3,14 +3,13 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 ;
 from Functions.plutoSDR import PlutoSDR
 from Functions.Request import predict_post
+from Functions.Plotter import Plotter
 
 class MainWindow(QtWidgets.QMainWindow):
 	def __init__(self) -> None:
 		super().__init__()
 
-		# Global vars
-		# self.worker = Worker()
-		self.analysis_window = None
+		# Layout things
 		self.main_layout = QtWidgets.QGridLayout()
 		self.prediction_layout = QtWidgets.QHBoxLayout()
 		self.side_bar_layout = QtWidgets.QVBoxLayout()
@@ -18,11 +17,9 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.chart_layout = QtWidgets.QVBoxLayout()
 		self.bottom_bar = QtWidgets.QHBoxLayout()
 
-		self.check_set_config_iq = False		
-		self.run_analysis_btn_check = False
-		self.check_open_configs = False
-		self.check_chart_displayed = False
+		# Global vars
 		self.check_filter = True	
+		self.run_state = False
 
 		# Go do the math
 		self.multipliers = {
@@ -154,9 +151,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
 		self.params['check_filter'] = check
 	
-	def calcMultiplier(self, freq):
-		return self.params[freq]*self.multipliers[multi]
-
 	def configBandwidth(self):
 		self.bandwidth_label = QtWidgets.QLabel("Bandwidth")
 		self.bandwidth_input = QtWidgets.QLineEdit()
@@ -231,7 +225,8 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.run_analysis_btn.clicked.connect(self.btnRunAnalysisPressed)
 
 	def btnRunAnalysisPressed(self, checked):
-		self.run_analysis_btn_check = checked
+		self.run_state = checked
+		# TODO: Close and open matplotlib window accordingly
 		if self.run_analysis_btn_check:
 			# GUI updates
 			self.run_analysis_btn.setText("Stop")
@@ -249,14 +244,6 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.get_batt_charge = QtWidgets.QLabel(f'Charging: {batt_plugged}')
 		self.bottom_bar.addWidget(self.get_batt_label)
 		self.bottom_bar.addWidget(self.get_batt_charge)
-
-class MatPlotLibWindow(QtCore.QObject):
-	def __init__(self) -> None:
-
-		self.analysis_thread = QtCore.QThread()
-		self.run_analysis_btn_check
-
-		self.initSDR()
 	
 	def initSDR(self):
 		self.SDR = PlutoSDR()
@@ -276,6 +263,11 @@ class MatPlotLibWindow(QtCore.QObject):
 		self.worker.deleteLater()
 		if self.run_state:
 			self.runAnalysisThread()
+
+class MatPlotLibWindow(QtCore.QObject):
+	def __init__(self) -> None:
+		super().__init__()
+		self.analysis_thread = QtCore.QThread()
 	
 	def updateGraph(self):
 		'''Update data for graph'''
