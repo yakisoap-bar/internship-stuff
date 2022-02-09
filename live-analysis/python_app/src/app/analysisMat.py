@@ -1,9 +1,5 @@
 from audioop import mul
-from PyQt5 import QtCore, QtWidgets, QtGui, QtCharts
-
-from Functions.Collect import *
-from Functions.Request import *
-from Functions.Status import *
+from PyQt5 import QtCore, QtWidgets, QtGui
 
 class MainWindow(QtWidgets.QMainWindow):
 	def __init__(self) -> None:
@@ -51,7 +47,6 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.buttons()
 		self.appLayout()
 	
-	@QtCore.Slot()
 	def configs(self):
 		# init app configs
 		screen_size = self.getScreenRes()
@@ -134,12 +129,10 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.show_configs_btn.clicked.connect(self.btnShowConfigsPressed)
 	
 	def btnShowConfigsPressed(self):
-		try:
-			self.analysis_window.updateParams(self.params)
-		except AttributeError:
-			pass
-		finally:
-			print(self.params)
+		# Calculate cf and bw with multipliers
+		self.params["cf"] = self.params["cfVal"]*(self.multipliers[self.params['cfMultiplier']])
+		self.params["bw"] = self.params["bwVal"]*(self.multipliers[self.params['bwMultiplier']])
+		print(self.params)
 	
 	def configFilter(self):
 		self.filter_label = QtWidgets.QLabel("Enable filtering")
@@ -180,6 +173,7 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.cf_label = QtWidgets.QLabel("Center Frequency")
 		self.cf_input = QtWidgets.QLineEdit()
 		self.cf_input.setText(str(self.params['cfVal']))
+		self.cf_input.textChanged.connect(self.configCFInputModified)
 
 		self.cf_dropdown = QtWidgets.QComboBox()
 		self.cf_dropdown.addItems(["mhz", "ghz"])
@@ -236,22 +230,10 @@ class MainWindow(QtWidgets.QMainWindow):
 			# GUI updates
 			self.run_analysis_btn.setText("Stop")
 			self.setWindowTitle("Running analysis...")
-
-			# Open new window
-			self.toggleAnalysisWindow()
-
-			# Actual analysis
-			self.connectSA()
-			self.analysis_window.updateParams(self.params)
-			self.analysis_window.updateAnalysisCheck(True)
-
 		else:
 			# GUI updates
 			self.run_analysis_btn.setText("Run")
 			self.setWindowTitle(self.window_title)
-
-			# Close analysis window
-			self.analysis_window.updateAnalysisCheck(False)
 	
 	def labelGetBatt(self):
 		batt_status = self.getBatt()
@@ -274,164 +256,3 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.connectSA()
 		batt = getBatteryStatus()
 		return batt
-
-	def toggleAnalysisWindow(self):
-		if self.analysis_window == None:
-			self.analysis_window = AnalysisWindow()
-			self.analysis_window.show()
-
-class AnalysisWindow(QtWidgets.QWidget):
-	def __init__(self) -> None:
-		super().__init__()
-
-		self.analysis_thread = QtCore.QThread()
-		self.check_chart_displayed = False
-
-		self.configs()
-		self.updateLayout()
-
-	def configs(self):
-		# App config things
-		screen_size = self.getScreenRes()
-		self.setGeometry(0, 0, screen_size.width(), screen_size.height())
-		self.window_title = "Live Classification"
-		self.setWindowTitle(self.window_title)
-		self.setWindowIcon(QtGui.QIcon('./img/icon.png'))
-	
-	def updateLayout(self):
-		self.chart = QtCharts.QtCharts.QChart()
-		self.chart.setTitle('Predictions')
-
-		self.initBarChart()
-		self.chart.addSeries(self.chart_data)
-
-		self._chart_view = QtCharts.QtCharts.QChartView(self.chart)
-		self._chart_view.setRenderHint(QtGui.QPainter.Antialiasing)
-
-		layout = QtWidgets.QVBoxLayout()
-		layout.addWidget(self._chart_view)
-		self.setLayout(layout)
-
-	def getScreenRes(self):
-		screen = QtWidgets.QApplication.primaryScreen()
-		screen = screen.availableGeometry()
-		return screen
-	
-	def updateAnalysisCheck(self, check):
-		self.run_analysis_btn_check = check
-		if self.run_analysis_btn_check:
-			self.runAnalysisThread()
-
-	def updateParams(self, params):
-		# Calculate cf and bw with multipliers
-		self.params["cf"] = self.params["cfVal"]*(self.multipliers[self.params['cfMultiplier']])
-		self.params["bw"] = self.params["bwVal"]*(self.multipliers[self.params['bwMultiplier']])
-
-		# Update params in analysis class
-		self.params = params
-
-	def runAnalysisThread(self):
-		self.worker = Worker(self.params)
-		self.worker.moveToThread(self.analysis_thread)
-		self.analysis_thread.started.connect(self.worker.runAnalysis)
-		self.analysis_thread.start()
-		self.worker.graphData.connect(self.updateGraph)
-		self.worker.finished.connect(self.runAnalysisRecursion)
-
-	def runAnalysisRecursion(self):
-		self.analysis_thread.quit()
-		self.worker.deleteLater()
-		if self.run_analysis_btn_check:
-			self.runAnalysisThread()
-
-	def updateGraph(self, res):
-		if res[0] == 200:
-			res = res[1]
-			self.chart_data.clear()
-			self.updateChart(res)
-		else:
-			print(res)
-
-	def initPieChart(self):
-		self.chart_data = QtCharts.QtCharts.QPieSeries()
-		self.updateChart = self.updatePieChart
-
-	def updatePieChart(self, res):
-		for i in range(0, len(res['signalNames'])):
-			self.chart_data.append(res['signalNames'][i], res['predictions'][i])
-
-	def initBarChart(self):
-		self.check_labels = False
-		self.chart_data = QtCharts.QtCharts.QHorizontalBarSeries()
-		# self.chart.setAnimationOptions(QtCharts.QtCharts.QChart.SeriesAnimations)
-
-		self.updateChart = self.updateHorizontalBarChart
-
-	def setBarColour(self, filter_res):
-		# Need to check the filter status on recv rather than on local or the update of colours lag
-		if filter_res:
-			# Set Green
-			self.data.setColor(QtGui.QColor("#369c5c"))
-		else:
-			# Set Blue
-			self.data.setColor(QtGui.QColor("#4271b8"))
-
-	def updateHorizontalBarChart(self, res):
-		# Round predictions
-		predictions = res['predictions']
-		filter_res = res['filtered']
-		for i in range(len(predictions)):
-			predictions[i] = round(predictions[i]*100, 2)
-
-		print(predictions)
-
-		self.data = QtCharts.QtCharts.QBarSet("Confidence")
-		self.data.append(predictions)
-		self.setBarColour(filter_res)
-		self.chart_data.clear()
-		self.chart_data.append(self.data)
-	
-		if self.check_chart_displayed == False:
-			self.axisY = QtCharts.QtCharts.QBarCategoryAxis()
-			self.axisY.append(res['signalNames'])
-			self.chart.addAxis(self.axisY, QtCore.Qt.AlignLeft)
-			self.chart_data.attachAxis(self.axisY)
-			self.check_chart_displayed = True
-
-			self.axisX = QtCharts.QtCharts.QValueAxis()
-			self.axisX.setRange(0, 100)
-			self.chart.addAxis(self.axisX, QtCore.Qt.AlignBottom)
-			self.chart_data.attachAxis(self.axisX)
-
-			self.chart.legend().setAlignment(QtCore.Qt.AlignBottom)
-			self.chart.legend().setVisible(True)
-
-		else:
-			self.axisX.applyNiceNumbers()
-
-class Worker(QtCore.QObject):
-	started = QtCore.Signal()
-	graphData = QtCore.Signal(object)
-	finished = QtCore.Signal()
-
-	def __init__(self, params) -> None:
-		super().__init__()
-		self.params = params
-
-	@QtCore.Slot()
-	def runAnalysis(self):
-		self.started.emit()
-		# Predict
-		config_block_iq(self.params['cf'], self.params['ref_level'], self.params['bw'], self.params['record_length'], self.params['sample_rate'])
-		data = acquire_block_iq(1024, self.params["num_records"])
-		predictions = predict_post('http://localhost:3000/predict', data, self.params['cf'], self.params['check_filter'])
-		print(predictions)
-
-		# Update stuff here
-		self.graphData.emit(predictions)
-		self.finished.emit()
-	
-	@QtCore.Slot()
-	def runBatteryCheck(self):
-		batt = getBatteryStatus()
-		self.finished.emit(batt)
