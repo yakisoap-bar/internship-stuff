@@ -19,11 +19,10 @@ class TerminalApp():
 	def globalVars(self):
 		'''Init vars'''
 		self.run_count = 0
-		self.backendURL = 'http://localhost:3000/predict'
 	
 	def run(self):
-		self.predict()
-		self.genBarChart()
+		predictions = self.predict()
+		self.genBarChart(predictions)
 		
 		if self.run_count != 1:
 			self.run_count -= 1
@@ -67,10 +66,10 @@ class TerminalApp():
 
 		# Read default configs
 		config = configparser.ConfigParser()
-		config.read(config, self.args.conf_file)
+		config.read(self.args.conf_file)
 		params = self.parseConfig(config, 'DEFAULT')
 		
-		if self.args.signal in self.config.sections():
+		if self.args.signal in config.sections():
 			signal_name = (self.args.signal).upper()
 			params = self.parseConfig(config, signal_name, params)
 		
@@ -94,9 +93,9 @@ class TerminalApp():
 			item = config[key][setting]
 
 			# type conversion
-			if key in intParams:
-				item = float(item)
-			elif key in boolParams:
+			if setting in intParams:
+				item = int(float(item))
+			elif setting in boolParams:
 				item = bool(item)
 			
 			params[setting] = item
@@ -109,23 +108,25 @@ class TerminalApp():
 		'''
 		self.updateConfigs()
 		data = self.SDR.collect_iq()
-		predictions = predict_post(self.backendURL, data, self.params['centerFreq'], self.params['filter_check'])
+		url = 'http://' + self.params['server_ip'] + ':3000/predict'
+		predictions = predict_post(url, data, self.params['center_freq'], self.params['filter_check'])
 		
 		return predictions
 	
-	def genBarChart(self):
+	def genBarChart(self, predictions):
 		# TODO visualise predictions
+		print(predictions)
 		pass
 
 	def initSDR(self):
 		'''Init SDR'''
 		self.SDR = PlutoSDR()
-		self.SDR.initConfig(self.params['centerFreq'], self.params['bandwidth'], self.params['numRecords'])
+		self.SDR.initConfig(self.params['center_freq'], self.params['rx_bandwidth'], self.params['num_records'])
 	
 	def updateConfigs(self):
 		'''Update SDR configs, if empty, no change'''
 		params = self.readConf()
-		if params != self.params():
+		if params != self.params:
 			self.params = params
 			self.SDR.config(self.params)
 
