@@ -9,6 +9,7 @@ __pycache__
 env
 Tektronix
 /training_notebooks/output.txt
+params.conf
 
 # distribution things
 dist/
