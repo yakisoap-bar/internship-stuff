@@ -5,7 +5,7 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 
 from Functions.plutoSDR import PlutoSDR
 from Functions.Request import predict_post
-from Functions.Plotter import Plotter
+from Functions.Plot import Plotter
 
 class MainWindow(QtWidgets.QMainWindow):
 	def __init__(self) -> None:
@@ -24,7 +24,7 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.run_state = False
 		self.__barStarted = False
 		self.analysis_thread = QtCore.QThread()
-		self.Plotter = Plotter()
+		self.Plot = Plotter()
 
 		# Go do the math
 		self.multipliers = {
@@ -244,8 +244,8 @@ class MainWindow(QtWidgets.QMainWindow):
 			self.run_analysis_btn.setText("Run")
 			self.setWindowTitle(self.window_title)
 
-			# Close Plotter
-			self.Plotter.closeWindow()
+			# Close Plot
+			# self.Plot.closeWindow()
 	
 	def labelGetBatt(self):
 		batt_status = self.getBatt()
@@ -266,7 +266,7 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.worker.moveToThread(self.analysis_thread)
 		self.analysis_thread.started.connect(self.worker.runAnalysis)
 		self.analysis_thread.start()
-		self.worker.graphData.connect(self.Plotter.drawChart)
+		self.worker.graphData.connect(self.Plot.drawChart)
 		self.worker.finished.connect(self.runAnalysisRecursion)
 	
 	def runAnalysisRecursion(self):
