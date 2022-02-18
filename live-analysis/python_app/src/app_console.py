@@ -122,7 +122,7 @@ class TerminalApp():
 		return predictions
 	
 	def genBarChart(self, predictions):
-		# TODO visualise predictions
+		# TODO: visualise predictions
 		print(predictions)
 
 		# check if bar chart has been initialised
