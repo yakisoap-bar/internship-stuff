@@ -30,7 +30,7 @@ class Plotter():
 
         plt.close('all')
         self.__eventWindowClosed()
-
+    
     def drawChart(self, predictions):
         '''
         This method draws and updates the chart displayed on the created window
@@ -75,29 +75,29 @@ class Plotter():
             plt.pause(0.01)
 
         # update the window
-        # plt.draw()
+        plt.draw()
 
-def main():
-    import numpy as np
-    from time import sleep
-    chart = Plotter()
-
-    for i in range(5):
-        chart.drawChart([200, {
-            'filtered' : True, 
-            'predictions' : np.random.rand(7),
-            'signalNames' : ['a', 'b', 'c', 'd', 'e', 'f', 'g']
-        }])
-
-        sleep(1)
-
-    chart.closeWindow()
-
-    for i in range(5):
-        chart.drawChart([200, {
-            'filtered' : True, 
-            'predictions' : np.random.rand(7),
-            'signalNames' : ['a', 'b', 'c', 'd', 'e', 'f', 'g']
-        }])
-
-        sleep(1)
+# def main():
+#     import numpy as np
+#     from time import sleep
+#     chart = Plotter()
+# 
+#     for i in range(5):
+#         chart.drawChart([200, {
+#             'filtered' : True, 
+#             'predictions' : np.random.rand(7),
+#             'signalNames' : ['a', 'b', 'c', 'd', 'e', 'f', 'g']
+#         }])
+# 
+#         sleep(1)
+# 
+#     chart.closeWindow()
+# 
+#     for i in range(5):
+#         chart.drawChart([200, {
+#             'filtered' : True, 
+#             'predictions' : np.random.rand(7),
+#             'signalNames' : ['a', 'b', 'c', 'd', 'e', 'f', 'g']
+#         }])
+# 
+#         sleep(1)

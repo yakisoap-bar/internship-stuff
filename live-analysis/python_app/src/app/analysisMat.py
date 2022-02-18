@@ -1,6 +1,8 @@
 from audioop import mul
+import matplotlib.pyplot as plt
+import numpy as np
 from PyQt5 import QtCore, QtWidgets, QtGui
-;
+
 from Functions.plutoSDR import PlutoSDR
 from Functions.Request import predict_post
 from Functions.Plotter import Plotter
@@ -20,6 +22,9 @@ class MainWindow(QtWidgets.QMainWindow):
 		# Global vars
 		self.check_filter = True	
 		self.run_state = False
+		self.__barStarted = False
+		self.analysis_thread = QtCore.QThread()
+		self.Plotter = Plotter()
 
 		# Go do the math
 		self.multipliers = {
@@ -31,12 +36,12 @@ class MainWindow(QtWidgets.QMainWindow):
 		# Default analyzing params
 		self.params = {
 			"num_records": 10,
-			"cf": 2440e6, # Center Frequency
+			"center_freq": 2440e6, # Center Frequency
 			"cfVal": 2440,
 			"cfMultiplier": "mhz",
 			"sample_rate": 0,
 			"ref_level": 0,
-			"bw": 40e6, # Bandwidth
+			"rx_bandwidth": 40e6, # Bandwidth
 			"bwVal": 40,
 			"bwMultiplier": "khz",
 			"record_length": 1024,
@@ -132,8 +137,8 @@ class MainWindow(QtWidgets.QMainWindow):
 	
 	def btnShowConfigsPressed(self):
 		# Calculate cf and bw with multipliers
-		self.params["cf"] = self.params["cfVal"]*(self.multipliers[self.params['cfMultiplier']])
-		self.params["bw"] = self.params["bwVal"]*(self.multipliers[self.params['bwMultiplier']])
+		self.params["center_freq"] = int(self.params["cfVal"]*(self.multipliers[self.params['cfMultiplier']]))
+		self.params["rx_bandwidth"] = int(self.params["bwVal"]*(self.multipliers[self.params['bwMultiplier']]))
 
 		print(self.params)
 	
@@ -227,14 +232,20 @@ class MainWindow(QtWidgets.QMainWindow):
 	def btnRunAnalysisPressed(self, checked):
 		self.run_state = checked
 		# TODO: Close and open matplotlib window accordingly
-		if self.run_analysis_btn_check:
+		if self.run_state:
 			# GUI updates
 			self.run_analysis_btn.setText("Stop")
 			self.setWindowTitle("Running analysis...")
+
+			# Run Analysis
+			self.runAnalysisThread()
 		else:
 			# GUI updates
 			self.run_analysis_btn.setText("Run")
 			self.setWindowTitle(self.window_title)
+
+			# Close Plotter
+			self.Plotter.closeWindow()
 	
 	def labelGetBatt(self):
 		batt_status = self.getBatt()
@@ -247,16 +258,17 @@ class MainWindow(QtWidgets.QMainWindow):
 	
 	def initSDR(self):
 		self.SDR = PlutoSDR()
+		self.btnShowConfigsPressed()
 		self.SDR.initConfig(self.params['center_freq'], self.params['rx_bandwidth'], self.params['num_records'])
 
 	def runAnalysisThread(self):
-		self.worker = Worker(self.params) # init thread
+		self.worker = Worker(self.SDR, self.params) # init thread
 		self.worker.moveToThread(self.analysis_thread)
 		self.analysis_thread.started.connect(self.worker.runAnalysis)
 		self.analysis_thread.start()
-		self.worker.graphData.connect(self.updateGraph)
+		self.worker.graphData.connect(self.Plotter.drawChart)
 		self.worker.finished.connect(self.runAnalysisRecursion)
-
+	
 	def runAnalysisRecursion(self):
 		'''Check if loop should stop'''
 		self.analysis_thread.quit()
@@ -296,7 +308,6 @@ class Worker(QtCore.QObject):
 	def predict(self):
 		data = self.SDR.collect_iq()
 		url = 'http://' + self.params['server_ip'] + ':3000/predict'
-		predictions = predict_post(url, data, self.params['center_freq'], self.params['filter_check'])
+		predictions = predict_post(url, data, self.params['center_freq'], self.params['check_filter'])
 
 		return predictions
-	
