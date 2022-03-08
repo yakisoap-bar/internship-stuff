@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-from Functions.Utils import printStatus
+from Functions.Utils import printStatus, printPrediction
 
 class Plotter():
     '''
@@ -45,7 +45,7 @@ class Plotter():
         # assign variables to data for sanity
         data = predictions[1]
 
-        printStatus(predictions)
+        printPrediction(predictions)
 
         # check if bar chart has been initialised
         if not self.__bar_started: # if chart is not initialised, create chart
