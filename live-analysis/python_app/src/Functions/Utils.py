@@ -1,10 +1,19 @@
 import os, shutil, math
 
-def printStatus(info):
-	# Clears screan after printing information
-	# info can be dict or list
-	os.system('cls' if os.name == 'nt' else 'clear')
-
+def dictToStr(content):
+	'''
+	Formats dictionary into readable string
+	
+	Parameters:
+	------
+	content : dict
+		Dictionary to be formatted
+	
+	Returns:
+	------
+	str
+		Printable string, lists dictionary items by 'key:item'
+	'''
 	i_type = type(info)
 	msg = ""
 
@@ -15,8 +24,6 @@ def printStatus(info):
 	elif i_type == list:
 		for i in info:
 			msg += f"{i}\n"
-	
-	print(msg)
 
 def bannerPadding(string, cols, rows, centered = True):
 	'''
@@ -56,6 +63,21 @@ def bannerPadding(string, cols, rows, centered = True):
 	return box
 
 def createBanner(section, msg = ""):
+	'''
+	Creates **aesthetic** banner that fills the whole terminal
+
+	Parameters:
+	------
+	section : str
+		Section header
+	msg : str
+		Content below section
+	
+	Returns: 
+	------
+	str
+		Banner
+	'''
 	cols, rows = shutil.get_terminal_size(fallback=(80, 24))
 
 	bannerh_border = "*" * cols
@@ -81,6 +103,5 @@ def createBanner(section, msg = ""):
 	banner += bannerPadding(msg, cols, msg_rows)
 	banner += f"{bannerh_border}"
 
-	return banner
-
-print(createBanner("Categories", "Message in a bottle"))
+	os.system('cls' if os.name == 'nt' else 'clear')
+	print(banner)

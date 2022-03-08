@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-from Functions.Utils import printStatus, printPrediction
+from Functions.Utils import createBanner
 
 class Plotter():
     '''
@@ -45,7 +45,9 @@ class Plotter():
         # assign variables to data for sanity
         data = predictions[1]
 
-        printPrediction(predictions)
+        to_print = '\t'.join(predictions[1]['signalNames']) + '\n'
+        to_print += '\t'.join([str(round(pred, 3)) for pred in predictions[1]['predictions']])
+        print(createBanner("Results", to_print))
 
         # check if bar chart has been initialised
         if not self.__bar_started: # if chart is not initialised, create chart
