@@ -313,5 +313,7 @@ class Worker(QtCore.QObject):
 		data = self.SDR.collect_iq()
 		url = 'http://' + self.params['server_ip'] + ':3000/predict'
 		predictions = predict_post(url, data, self.params['center_freq'], self.params['check_filter'])
+		results = {"data": data,
+					"predictions": predictions}
 
-		return predictions
+		return results
