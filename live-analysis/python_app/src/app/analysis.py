@@ -1,3 +1,5 @@
+# Graph using the PyQt Library
+
 from audioop import mul
 from PyQt5 import QtCore, QtWidgets, QtGui, QtCharts
 

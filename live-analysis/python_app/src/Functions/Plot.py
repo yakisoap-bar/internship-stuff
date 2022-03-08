@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 
+from Functions.Utils import printStatus
+
 class Plotter():
     '''
     A class to draw a nice looking live graph with matplotlib.
@@ -43,7 +45,7 @@ class Plotter():
         # assign variables to data for sanity
         data = predictions[1]
 
-        print(predictions)
+        printStatus(predictions)
 
         # check if bar chart has been initialised
         if not self.__bar_started: # if chart is not initialised, create chart

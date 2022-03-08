@@ -1,5 +1,8 @@
+# Graph using Matlab libary
+
 from audioop import mul
 import matplotlib.pyplot as plt
+from Functions.Utils import printStatus
 import numpy as np
 from PyQt5 import QtCore, QtWidgets, QtGui
 
@@ -140,7 +143,7 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.params["center_freq"] = int(self.params["cfVal"]*(self.multipliers[self.params['cfMultiplier']]))
 		self.params["rx_bandwidth"] = int(self.params["bwVal"]*(self.multipliers[self.params['bwMultiplier']]))
 
-		print(self.params)
+		printStatus(self.params)
 	
 	def configFilter(self):
 		self.filter_label = QtWidgets.QLabel("Enable filtering")
