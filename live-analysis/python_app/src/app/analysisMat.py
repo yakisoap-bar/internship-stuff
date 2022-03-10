@@ -143,7 +143,7 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.params["center_freq"] = int(self.params["cfVal"]*(self.multipliers[self.params['cfMultiplier']]))
 		self.params["rx_bandwidth"] = int(self.params["bwVal"]*(self.multipliers[self.params['bwMultiplier']]))
 
-		createBanner("Configurations", dictToString(self.params))
+		createBanner("Configurations", dictToStr(self.params))
 	
 	def configFilter(self):
 		self.filter_label = QtWidgets.QLabel("Enable filtering")
@@ -235,7 +235,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
 	def btnRunAnalysisPressed(self, checked):
 		self.run_state = checked
-		# TODO: Close and open matplotlib window accordingly
 		if self.run_state:
 			# GUI updates
 			self.run_analysis_btn.setText("Stop")

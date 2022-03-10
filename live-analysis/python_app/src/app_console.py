@@ -5,6 +5,7 @@ import numpy as np
 
 from Functions.plutoSDR import PlutoSDR
 from Functions.Request import predict_post
+from Functions.Utils import createBanner
 
 class TerminalApp():
 	def __init__(self) -> None:
@@ -123,7 +124,7 @@ class TerminalApp():
 	
 	def genBarChart(self, predictions):
 		# TODO: Split these into functions
-		print(predictions)
+		createBanner("Predictions", predictions)
 
 		# check if bar chart has been initialised
 		if not self.__barStarted: # if chart is not initialised, create chart

@@ -1,5 +1,10 @@
 import os, shutil, math
 
+def formatPredictions(predictions):
+    msg = '\t'.join(predictions[1]['signalNames']) + '\n'
+    msg += '\t'.join([str(round(pred, 3)) for pred in predictions[1]['predictions']])
+	return msg
+
 def dictToStr(content):
 	'''
 	Formats dictionary into readable string
