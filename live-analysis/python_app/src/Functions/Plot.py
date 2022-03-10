@@ -1,6 +1,10 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
+<<<<<<< HEAD
 from Functions.Utils import *
+=======
+>>>>>>> 19fc8d4f41273a173a5b6b58a572b43162f1eeb2
 
 class Plotter():
     '''
@@ -43,20 +47,23 @@ class Plotter():
         Expected format: `[status_code, response_body]`
         '''
         # assign variables to data for sanity
-        data = predictions[1]
+        iq = predictions['data']
+        data = predictions['predictions'][1]
 
-        print(createBanner("Results", formatPredictions(predictions)))
+        printPrediction(data)
 
         # check if bar chart has been initialised
         if not self.__bar_started: # if chart is not initialised, create chart
             plt.ion()
 
             # initialise chart
-            self.__plot_figure = plt.figure(1, figsize=(10,7))
+            self.__plot_figure = plt.figure(1, figsize=(10,10))
+            self.__gridspec = self.__plot_figure.add_gridspec(ncols=1, nrows=5)
+
             self.__plot_figure.canvas.mpl_connect('close_event', self.__eventWindowClosed)
 
             # set up chart
-            self.__plot_axes = self.__plot_figure.add_subplot(111)
+            self.__plot_axes = self.__plot_figure.add_subplot(self.__gridspec[:4, 0])
             self.__plot_axes.set_xlim(left=0, right=1)
             self.__plot_axes.set_xlabel('Probability')
             
@@ -92,6 +99,14 @@ class Plotter():
                             text='Filtered', 
                             ha='left'
                         )
+
+            # create IQ visualisation of data collected
+            self.__iq_plot = self.__plot_figure.add_subplot(self.__gridspec[4, 0])
+
+            # plot IQ lines
+            x = np.arange(np.shape(iq)[-1])
+
+            self.__iq_lines = self.__iq_plot.plot(x, np.transpose(iq[0]))
 
             self.__bar_started = True
 
@@ -134,11 +149,16 @@ class Plotter():
                             x=pred+0.01 if pred < 0.08 else pred-0.01, 
                             ha='left' if pred < 0.08 else 'right'
                         )
-
+        
+            # update IQ visualisation
+            print(self.__iq_lines)
+            for i, line in enumerate(self.__iq_lines):
+                line.set_ydata(iq[0][i])
+            # self.__plot_figure.canvas.draw()  
 
 
         # update the window
-        plt.pause(0.01)
+        plt.pause(0.001)
 
 
 def main():
