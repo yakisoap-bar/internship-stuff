@@ -1,14 +1,20 @@
 # Graph using Matlab libary
-
 from audioop import mul
 import matplotlib.pyplot as plt
 from Functions.Utils import *
 import numpy as np
 from PyQt5 import QtCore, QtWidgets, QtGui
 
-from Functions.plutoSDR import PlutoSDR
+# Plotting
 from Functions.Request import predict_post
 from Functions.Plot import Plotter
+
+# SA
+from Functions.Collect import *
+from Functions.Request import *
+from Functions.Status import *
+
+from Functions.plutoSDR import PlutoSDR
 
 class MainWindow(QtWidgets.QMainWindow):
 	def __init__(self) -> None:
@@ -53,7 +59,9 @@ class MainWindow(QtWidgets.QMainWindow):
 		}
 
 		self.configs()
-		self.buttons()
+		self.configSDR()
+		self.initButtons()
+		self.layoutButtons()
 		self.appLayout()
 	
 	def configs(self):
@@ -68,7 +76,10 @@ class MainWindow(QtWidgets.QMainWindow):
 		iconLocation = './img/networkneural.png'
 		icon.addPixmap(QtGui.QPixmap(iconLocation), QtGui.QIcon.Selected, QtGui.QIcon.On)
 		self.setWindowIcon(icon)
-		self.initSDR()
+
+	def configSDR():
+		# TODO: Detect Pluto or Tektronix SDR
+		self.initPlutoSDR()
 	
 	def appLayout(self):
 		self.menuToolbar()
@@ -80,9 +91,8 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.container = QtWidgets.QWidget()
 		self.container.setLayout(self.main_layout)
 		self.setCentralWidget(self.container)
-		# print(QtWidgets.QWidget.minimumWidth())
 
-	def buttons(self):
+	def initButtons(self):
 		# Init all buttons here
 		self.btnRunAnalysis()
 		self.btnShowConfigs()
@@ -93,6 +103,7 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.configSamplingFreq()
 		self.configFilter()
 	
+	def layoutButtons(self):
 		# Config buttons layout
 		self.config_layout.addRow(self.filter_label, self.filter_checkbox)
 		self.config_layout.addRow(self.cf_label)
@@ -102,22 +113,6 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.config_layout.addRow(self.ref_lvl_label, self.ref_lvl_input)
 		self.config_layout.addRow(self.ref_lvl_slider)
 		self.config_layout.addRow(self.sampling_freq_label, self.sampling_freq_input)
-
-		self.config_buttons = [
-			self.cf_label,
-			self.cf_input,
-			self.cf_dropdown,
-			self.bandwidth_label,
-			self.bandwidth_input,
-			self.bandwidth_dropdown,
-			self.ref_lvl_label,
-			self.ref_lvl_input,
-			self.ref_lvl_slider,
-			self.sampling_freq_label,
-			self.sampling_freq_input,
-			self.filter_label,
-			self.filter_checkbox
-		]
 	
 	def getScreenRes(self):
 		screen = QtWidgets.QApplication.primaryScreen()
@@ -259,13 +254,19 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.bottom_bar.addWidget(self.get_batt_label)
 		self.bottom_bar.addWidget(self.get_batt_charge)
 	
-	def initSDR(self):
+	def initPlutoSDR(self):
 		self.SDR = PlutoSDR()
 		self.btnShowConfigsPressed()
 		self.SDR.initConfig(self.params['center_freq'], self.params['rx_bandwidth'], self.params['num_records'])
+	
+	def initTektronixSDR(self):
+		pass
+
+	def checkTektronixInit(self):
+		pass
 
 	def runAnalysisThread(self):
-		self.worker = Worker(self.SDR, self.params) # init thread
+		self.worker = Worker(self.params, self.SDR) # init thread
 		self.worker.moveToThread(self.analysis_thread)
 		self.analysis_thread.started.connect(self.worker.runAnalysis)
 		self.analysis_thread.start()
@@ -297,10 +298,11 @@ class Worker(QtCore.QObject):
 	graphData = QtCore.Signal(object)
 	finished = QtCore.Signal()
 
-	def __init__(self, SDR, params) -> None:
+	def __init__(self, params, SDR=None) -> None:
 		super().__init__()
-		self.SDR = SDR
 		self.params = params
+		if SDR != None:
+			self.SDR = SDR
 
 	def runAnalysis(self):
 		self.started.emit()
@@ -308,8 +310,17 @@ class Worker(QtCore.QObject):
 		self.graphData.emit(predictions)
 		self.finished.emit()
 
-	def predict(self):
+	def runTektronixSDR(self):
+		config_block_iq(self.params['cf'], self.params['ref_level'], self.params['bw'], self.params['record_length'], self.params['sample_rate'])
+		data = acquire_block_iq(1024, self.params["num_records"])
+		return data
+	
+	def runPlutoSDR(self):
 		data = self.SDR.collect_iq()
+		return data
+
+	def predict(self):
+		data = self.runPlutoSDR()
 		url = 'http://' + self.params['server_ip'] + ':3000/predict'
 		predictions = predict_post(url, data, self.params['center_freq'], self.params['check_filter'])
 		results = {"data": data,

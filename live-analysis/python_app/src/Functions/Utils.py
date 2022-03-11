@@ -1,8 +1,8 @@
 import os, shutil, math
 
 def formatPredictions(predictions):
-    msg = '\t'.join(predictions[1]['signalNames']) + '\n'
-    msg += '\t'.join([str(round(pred, 3)) for pred in predictions[1]['predictions']])
+	msg = '\t'.join(predictions[1]['signalNames']) + '\n'
+	msg += '\t'.join([str(round(pred, 3)) for pred in predictions[1]['predictions']])
 	return msg
 
 def dictToStr(content):
@@ -69,7 +69,7 @@ def bannerPadding(string, cols, rows, centered = True):
 
 def createBanner(section, msg = ""):
 	'''
-	Creates **aesthetic** banner that fills the whole terminal
+	Prints **aesthetic** banner that fills the whole terminal
 
 	Parameters:
 	------
@@ -99,6 +99,7 @@ def createBanner(section, msg = ""):
 			trunc_line = msg[i][:line_len-max_line_len]
 			msg.insert(i+1, trunc_line)	
 
+	# Build the banner
 	# Section Header
 	banner = f"{bannerh_border}"
 	banner += bannerPadding([section], cols, header_rows)

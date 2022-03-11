@@ -1,10 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-<<<<<<< HEAD
 from Functions.Utils import *
-=======
->>>>>>> 19fc8d4f41273a173a5b6b58a572b43162f1eeb2
 
 class Plotter():
     '''
@@ -50,7 +47,7 @@ class Plotter():
         iq = predictions['data']
         data = predictions['predictions'][1]
 
-        printPrediction(data)
+        createBanner(formatPrediction(data))
 
         # check if bar chart has been initialised
         if not self.__bar_started: # if chart is not initialised, create chart
@@ -165,7 +162,6 @@ def main():
     import numpy as np
     from time import sleep
     chart = Plotter()
-
 
     # for i in range(10):
     #     chart.drawChart([200, {
