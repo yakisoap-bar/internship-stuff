@@ -10,7 +10,7 @@ from Functions.Status import *
 
 # Plotting
 from Functions.Request import predict_post
-from Functions.Plot import Plotter
+from Functions.Plot import Plot
 
 # Misc
 from Functions.Utils import createBanner

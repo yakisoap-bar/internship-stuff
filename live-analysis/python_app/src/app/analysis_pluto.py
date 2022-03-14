@@ -7,7 +7,7 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 
 # Plotting
 from Functions.Request import predict_post
-from Functions.Plot import Plotter
+from Functions.Plot import Plot
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self) -> None:

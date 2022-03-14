@@ -6,7 +6,7 @@ import numpy as np
 from Functions.plutoSDR import PlutoSDR
 from Functions.Request import predict_post
 from Functions.Utils import createBanner, formatPrediction
-from Functions.Plot import Plotter
+from Functions.Plot import Plot
 
 class TerminalApp():
 	def __init__(self) -> None:
