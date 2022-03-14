@@ -4,9 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # SA
-from Functions.Collect import *
+from Functions.Tektronix import Tektronix
 from Functions.Request import *
-from Functions.Status import *
 
 # Plotting
 from Functions.Request import predict_post
@@ -33,6 +32,7 @@ class TerminalApp():
         '''Init vars'''
         self.run_count = 0
         self.Plot = Plot()
+        self.Tektronix = Tektronix()
     
     def start(self):
         if self.args.battery:
@@ -43,7 +43,7 @@ class TerminalApp():
             self.runPredictions()
         
     def getBatt(self):
-        batt = getBatteryStatus()
+        batt = self.Tektronix.getBatteryStatys()
         return batt
 
     def runPredictions(self):
@@ -139,7 +139,7 @@ class TerminalApp():
         Send signals and return predictions
         '''
         self.updateConfigs()
-        data = acquire_block_iq(1024, self.params['num_records'])
+        data = self.Tektronix.acquire_block_iq(1024, self.params['num_records'])
         url = 'http://' + self.params['server_ip'] + ':3000/predict'
         predictions = predict_post(url, data, self.params['center_freq'], self.params['filter_check'])
         results = {"data": data,
@@ -151,14 +151,14 @@ class TerminalApp():
 
     def initSDR(self):
         '''Init SDR'''
-        device_connect()
+        self.Tektronix.device_connect()
     
     def updateConfigs(self):
         '''Update SDR configs, if empty, no change'''
         params = self.readConf()
         if params != self.params:
             self.params = params
-            config_block_iq(self.params['center_freq'], self.params['ref_level'], self.params['rx_bandwidth'], 1024)
+            self.Tektronix.config_block_iq(self.params['center_freq'], self.params['ref_level'], self.params['rx_bandwidth'], 1024)
 
 def main():
     app = TerminalApp()

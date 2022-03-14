@@ -10,14 +10,12 @@ from Functions.Request import predict_post
 from Functions.Plot import Plot
 
 # SA
-from Functions.Collect import *
+from Functions.Tektronix import Tektronix
 from Functions.Request import *
-from Functions.Status import *
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self) -> None:
         super().__init__()
-
         self.globalVars()
         self.configs()
         self.configSDR()
@@ -26,6 +24,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.appLayout()
     
     def globalVars(self):
+        # Global vars
+        self.Plot = Plot()
+        self.Tektronix = Tektronix()
+        self.check_filter = True	
+        self.run_state = False
+        self.__barStarted = False
+        self.analysis_thread = QtCore.QThread()
+
         # Layout things
         self.main_layout = QtWidgets.QGridLayout()
         self.prediction_layout = QtWidgets.QHBoxLayout()
@@ -33,13 +39,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.config_layout = QtWidgets.QFormLayout()
         self.chart_layout = QtWidgets.QVBoxLayout()
         self.bottom_bar = QtWidgets.QHBoxLayout()
-
-        # Global vars
-        self.check_filter = True	
-        self.run_state = False
-        self.__barStarted = False
-        self.analysis_thread = QtCore.QThread()
-        self.Plot = Plot()
 
         # Go do the math
         self.multipliers = {
@@ -261,7 +260,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.bottom_bar.addWidget(self.get_batt_charge)
     
     def getBatt(self):
-        batt = getBatteryStatus()
+        batt = self.Tektronix.getBatteryStatus()
         return batt
     
     def initPlutoSDR(self):
@@ -277,7 +276,7 @@ class MainWindow(QtWidgets.QMainWindow):
             createBanner("Error!", "SA not connected!")
     
     def connectSA(self):
-        output = device_connect()
+        output = self.Tektronix.device_connect()
         if output["message"] == "Connection Success.":
             self.check_SA_connection = True
         else:
@@ -348,8 +347,8 @@ class Worker(QtCore.QObject):
         self.finished.emit()
 
     def runTektronixSDR(self):
-        config_block_iq(self.params['center_freq'], self.params['ref_level'], self.params['rx_bandwidth'], self.params['record_length'], self.params['sample_rate'])
-        data = acquire_block_iq(1024, self.params["num_records"])
+        self.Tektronix.config_block_iq(self.params['center_freq'], self.params['ref_level'], self.params['rx_bandwidth'], self.params['record_length'], self.params['sample_rate'])
+        data = self.Tektronix.acquire_block_iq(1024, self.params["num_records"])
         return data
     
     def runPlutoSDR(self):
