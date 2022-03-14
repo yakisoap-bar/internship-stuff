@@ -71,7 +71,7 @@ class TerminalApp():
                             nargs='?', default='params.conf', type=str,
                             help="Specify configuration file.")
         parser.add_argument('-s', '--signal',
-                            dest="signal", metavar="configFile",
+                            dest="signal",
                             nargs='?', type=str,
                             help="Select default signal parameters")
         parser.add_argument('-r', '--run',
@@ -92,7 +92,6 @@ class TerminalApp():
         Load and parse config file
         returns params
         '''
-
         try:
             # Read default configs
             config = configparser.ConfigParser()

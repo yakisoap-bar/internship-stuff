@@ -141,4 +141,4 @@ def createBanner(section, msg=''):
     print('\n'*msg_pad_top)
     for line in msg:
         print(line.center(cols))
-    print('\n'*msg_pad_btm, full_lines, sep='')
+    print('\n'*msg_pad_btm, full_lines, sep='', end="")
