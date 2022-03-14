@@ -100,14 +100,15 @@ def createBanner(section, msg = ""):
 			msg.insert(i+1, trunc_line)	
 
 	# Build the banner
+	banner = "\n"
 	# Section Header
-	banner = f"{bannerh_border}"
+	banner += f"{bannerh_border}"
 	banner += bannerPadding([section], cols, header_rows)
 	banner += f"{bannerh_border}"
 
 	# Section content	
 	banner += bannerPadding(msg, cols, msg_rows)
-	banner += f"{bannerh_border}"
+	banner += f"{bannerh_border}".strip()
 
 	os.system('cls' if os.name == 'nt' else 'clear')
 	print(banner)

@@ -323,7 +323,6 @@ class Worker(QtCore.QObject):
 		data = self.runPlutoSDR()
 		url = 'http://' + self.params['server_ip'] + ':3000/predict'
 		predictions = predict_post(url, data, self.params['center_freq'], self.params['check_filter'])
-		results = {"data": data,
-					"predictions": predictions}
+		results = {"data": data, "predictions": predictions}
 
 		return results
