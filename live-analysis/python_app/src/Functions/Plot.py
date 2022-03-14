@@ -16,7 +16,7 @@ class Plotter():
         Event hook for when chart window is closed. Should not be publicly accessed.
         '''
 
-        print('closing window')
+        createBanner('Notification', 'closing window')
         self.__bar_started = False
 
     def isStarted(self):
@@ -47,7 +47,7 @@ class Plotter():
         iq = predictions['data']
         data = predictions['predictions'][1]
 
-        createBanner(formatPrediction(data))
+        createBanner("Predictions", formatPrediction(data))
 
         # check if bar chart has been initialised
         if not self.__bar_started: # if chart is not initialised, create chart
@@ -148,7 +148,6 @@ class Plotter():
                         )
         
             # update IQ visualisation
-            print(self.__iq_lines)
             for i, line in enumerate(self.__iq_lines):
                 line.set_ydata(iq[0][i])
             # self.__plot_figure.canvas.draw()  

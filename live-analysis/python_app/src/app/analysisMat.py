@@ -41,7 +41,7 @@ class MainWindow(QtWidgets.QMainWindow):
             "center_freq": 2440e6, # Center Frequency
             "cfVal": 2440,
             "cfMultiplier": "mhz",
-            "sample_rate": 0,
+            "sample_rate": 54000000,
             "ref_level": 0,
             "rx_bandwidth": 40e6, # Bandwidth
             "bwVal": 40,
@@ -73,6 +73,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def configSDR(self):
         # TODO: Detect for Pluto or Tektronix SDR
         self.checkSDRDepend()
+        self.initPlutoSDR()
     
     def checkSDRDepend(self):
         self.checkPlutoSDRDepend()
@@ -136,6 +137,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.params["rx_bandwidth"] = int(self.params["bwVal"]*(self.multipliers[self.params['bwMultiplier']]))
 
         createBanner("Configurations", dictToStr(self.params))
+        self.SDR.config(self.params)
     
     def configFilter(self):
         self.filter_label = QtWidgets.QLabel("Enable filtering")

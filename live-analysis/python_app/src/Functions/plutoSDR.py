@@ -41,7 +41,7 @@ class PlutoSDR():
         `{'sampling_rate', 'num_records, 'center_freq, 'rx_bandwidth', 'r_length}`
         '''
 
-        possible_configs = ['sampling_rate', 'num_records', 'center_freq', 'rx_bandwidth', 'r_length']
+        possible_configs = ['sample_rate', 'num_records', 'center_freq', 'rx_bandwidth', 'record_length']
         temp_cfg_keys = configs.keys()
 
         # return current configuration if nothing passed
@@ -55,7 +55,7 @@ class PlutoSDR():
             }
 
         # check if correct parameters are passed
-        if sorted(temp_cfg_keys) != sorted(possible_configs):
+        if not all(x in temp_cfg_keys for x in possible_configs):
             raise KeyError(f'Config Mismatch! Expected {possible_configs}, got {temp_cfg_keys}.')
 
         # set parameters to SDR
