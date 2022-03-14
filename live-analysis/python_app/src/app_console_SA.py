@@ -52,7 +52,7 @@ class TerminalApp():
         
         if self.run_count != 1:
             self.run_count -= 1
-            self.run()
+            self.runPredictions()()
         
     def parseArgs(self):
         '''argparse'''
