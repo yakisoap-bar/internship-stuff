@@ -5,7 +5,8 @@ import numpy as np
 
 from Functions.plutoSDR import PlutoSDR
 from Functions.Request import predict_post
-from Functions.Utils import createBanner
+from Functions.Utils import createBanner, formatPrediction
+from Functions.Plot import Plotter
 
 class TerminalApp():
 	def __init__(self) -> None:
@@ -122,36 +123,9 @@ class TerminalApp():
 		
 		return predictions
 	
-	def genBarChart(self, predictions):
-		# TODO: Split these into functions
-		createBanner("Predictions", predictions)
-
-		# check if bar chart has been initialised
-		if not self.__barStarted: # if chart is not initialised, create chart
-			plt.ion()
-
-			self.__plotFigure = plt.figure(1, figsize=(10,len(predictions[1]['predictions'])))
-			self.__plotAxes = self.__plotFigure.add_subplot(111)
-			self.__plotAxes.set_xlim(left=0, right=1)
-			self.__barRects = self.__plotAxes.barh(
-				predictions[1]['signalNames'], 
-				predictions[1]['predictions'],
-				color='green' if predictions[1]['filtered'] else 'cyan'
-			)
-			self.__barStarted = True
-
-		else: # if chart is initialised, update chart
-			ax = self.__plotAxes
-			rects = self.__barRects
-
-			ax.set_title(np.random.rand(1))
-
-			for rect, pred in zip(rects, predictions[1]['predictions']):
-				rect.set_width(pred)
-				rect.set(color='green')
-				plt.pause(0.01)
-
-		plt.draw()
+	def genBarChart(self, predictions, data):
+		chart = Plotter()
+		chart.drawChart({'data': data, 'predictions': predictions[1]})
 
 	def initSDR(self):
 		'''Init SDR'''
