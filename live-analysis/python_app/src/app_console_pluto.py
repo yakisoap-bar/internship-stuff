@@ -5,7 +5,6 @@ import numpy as np
 
 from Functions.plutoSDR import PlutoSDR
 from Functions.Request import predict_post
-from Functions.Utils import createBanner, formatPrediction
 from Functions.Plot import Plot
 
 class TerminalApp():
@@ -27,8 +26,8 @@ class TerminalApp():
 		self.run_count = 0
 	
 	def run(self):
-		predictions = self.predict()
-		self.genBarChart(predictions)
+		data, predictions = self.predict()
+		self.genBarChart(predictions, data)
 		
 		if self.run_count != 1:
 			self.run_count -= 1
@@ -121,7 +120,7 @@ class TerminalApp():
 		url = 'http://' + self.params['server_ip'] + ':3000/predict'
 		predictions = predict_post(url, data, self.params['center_freq'], self.params['filter_check'])
 		
-		return predictions
+		return [data, predictions]
 	
 	def genBarChart(self, predictions, data):
 		chart = Plot()
