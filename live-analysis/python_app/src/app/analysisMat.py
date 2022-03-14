@@ -337,11 +337,19 @@ class Worker(QtCore.QObject):
         data = self.SDR.collect_iq()
         return data
 
+<<<<<<< HEAD
+	def predict(self):
+		data = self.runPlutoSDR()
+		url = 'http://' + self.params['server_ip'] + ':3000/predict'
+		predictions = predict_post(url, data, self.params['center_freq'], self.params['check_filter'])
+		results = {"data": data, "predictions": predictions}
+=======
     def predict(self):
         data = self.runPlutoSDR()
         url = 'http://' + self.params['server_ip'] + ':3000/predict'
         predictions = predict_post(url, data, self.params['center_freq'], self.params['check_filter'])
         results = {"data": data,
                     "predictions": predictions}
+>>>>>>> 0026440a2d20f749ebde1a0363dcf4342faefae8
 
         return results

@@ -47,7 +47,11 @@ class Plotter():
         iq = predictions['data']
         data = predictions['predictions'][1]
 
+<<<<<<< HEAD
         createBanner("Predictions", formatPrediction(data))
+=======
+        createBanner(data)
+>>>>>>> 5ce744d9622e03b994e931dc6c341d5d14540935
 
         # check if bar chart has been initialised
         if not self.__bar_started: # if chart is not initialised, create chart

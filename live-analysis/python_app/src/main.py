@@ -1,6 +1,6 @@
 import sys
 from PyQt5 import QtWidgets
-from app.analysisMat import MainWindow
+from app.analysis_SA import MainWindow
 
 # Run the application
 def main():
