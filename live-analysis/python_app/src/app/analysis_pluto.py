@@ -329,8 +329,8 @@ class Worker(QtCore.QObject):
         self.finished.emit()
 
     def runTektronixSDR(self):
-        config_block_iq(self.params['cf'], self.params['ref_level'], self.params['bw'], self.params['record_length'], self.params['sample_rate'])
-        data = acquire_block_iq(1024, self.params["num_records"])
+        self.Tektronix.config_block_iq(self.params['cf'], self.params['ref_level'], self.params['bw'], self.params['record_length'], self.params['sample_rate'])
+        data = self.Tektronix.acquire_block_iq(1024, self.params["num_records"])
         return data
     
     def runPlutoSDR(self):
