@@ -31,7 +31,7 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.run_state = False
 		self.__barStarted = False
 		self.analysis_thread = QtCore.QThread()
-		self.Plot = Plotter()
+		self.Plot = Plot()
 
 		# Go do the math
 		self.multipliers = {

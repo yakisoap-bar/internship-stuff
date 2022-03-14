@@ -124,7 +124,7 @@ class TerminalApp():
 		return predictions
 	
 	def genBarChart(self, predictions, data):
-		chart = Plotter()
+		chart = Plot()
 		chart.drawChart({'data': data, 'predictions': predictions[1]})
 
 	def initSDR(self):

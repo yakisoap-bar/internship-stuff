@@ -32,7 +32,7 @@ class TerminalApp():
     def globalVars(self):
         '''Init vars'''
         self.run_count = 0
-        self.Plot = Plotter()
+        self.Plot = Plot()
     
     def start(self):
         if self.args.battery:

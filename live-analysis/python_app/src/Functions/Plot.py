@@ -3,7 +3,7 @@ import numpy as np
 
 from Functions.Utils import *
 
-class Plotter():
+class Plot():
     '''
     A class to draw a nice looking live graph with matplotlib.
     '''
@@ -160,7 +160,7 @@ class Plotter():
 def main():
     import numpy as np
     from time import sleep
-    chart = Plotter()
+    chart = Plot()
 
     # for i in range(10):
     #     chart.drawChart([200, {
