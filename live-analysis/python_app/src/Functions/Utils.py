@@ -38,9 +38,11 @@ def splitLines(line_string, length):
     return lines
 
 def formatPrediction(predictions):
-	msg = '\t'.join(predictions['signalNames']) + '\n'
-	msg += '\t'.join([str(round(pred, 3)) for pred in predictions['predictions']])
-	return msg
+    msg = ''
+    for name, prediction in zip(predictions['signalNames'], predictions['predictions']):
+        msg += f'{name:>8}: {prediction:<8.3f}\n'
+
+    return msg
 
 def dictToStr(content):
 	'''
@@ -135,10 +137,10 @@ def createBanner(section, msg=''):
     # calculate remaining space for message
     msg_space = rows - 4 - len(section) - 1
     msg_pad_top = (msg_space - len(msg)) // 2
-    msg_pad_btm = msg_space - msg_pad_top - len(msg) - 1
+    msg_pad_btm = msg_space - msg_pad_top - len(msg) - 2
 
     # print message section
     print('\n'*msg_pad_top)
     for line in msg:
         print(line.center(cols))
-    print('\n'*msg_pad_btm, full_lines, sep='', end="")
+    print('\n'*msg_pad_btm, full_lines, sep='')
