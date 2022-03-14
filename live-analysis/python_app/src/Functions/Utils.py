@@ -106,7 +106,6 @@ def bannerPadding(string, cols, rows, centered = True):
 
 	return box
 
-<<<<<<< HEAD
 def createBanner(section, msg=''):
     '''
     function to create a banner according to terminal window size.
@@ -143,50 +142,3 @@ def createBanner(section, msg=''):
     for line in msg:
         print(line.center(cols))
     print('\n'*msg_pad_btm, full_lines, sep='')
-=======
-def createBanner(section, msg = ""):
-	'''
-	Prints **aesthetic** banner that fills the whole terminal
-
-	Parameters:
-	------
-	section : str
-		Section header
-	msg : str
-		Content below section
-	
-	Returns: 
-	------
-	str
-		Banner
-	'''
-	cols, rows = shutil.get_terminal_size(fallback=(80, 24))
-
-	bannerh_border = "*" * cols
-	paddingv = 5
-	max_line_len = cols - paddingv*2
-	header_rows = 5
-	msg_rows = rows - header_rows - 3
-
-	# Split msg into clean lines
-	msg = msg.split('\n')
-	for i in range(len(msg)):
-		line_len = len(msg[i])
-		if line_len > max_line_len:
-			trunc_line = msg[i][:line_len-max_line_len]
-			msg.insert(i+1, trunc_line)	
-
-	# Build the banner
-	banner = "\n"
-	# Section Header
-	banner += f"{bannerh_border}"
-	banner += bannerPadding([section], cols, header_rows)
-	banner += f"{bannerh_border}"
-
-	# Section content	
-	banner += bannerPadding(msg, cols, msg_rows)
-	banner += f"{bannerh_border}".strip()
-
-	os.system('cls' if os.name == 'nt' else 'clear')
-	print(banner)
->>>>>>> 5ce744d9622e03b994e931dc6c341d5d14540935
