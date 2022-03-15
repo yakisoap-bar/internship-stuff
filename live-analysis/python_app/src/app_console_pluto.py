@@ -29,7 +29,6 @@ class TerminalApp():
         '''Init vars'''
         self.run_count = 0
         self.Plot = Plot()
-        self.Tektronix = Tektronix()
  
     def start(self):
         if self.args.battery:
@@ -39,10 +38,6 @@ class TerminalApp():
         else:
             self.runPredictions()
         
-    def getBatt(self):
-        batt = self.Tektronix.getBatteryStatys()
-        return batt
-
     def runPredictions(self):
         predictions = self.predict()
         self.genBarChart(predictions)
