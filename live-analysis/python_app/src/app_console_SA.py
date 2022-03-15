@@ -98,7 +98,7 @@ class TerminalApp():
             config.read(self.args.conf_file)
             params = self.parseConfig(config, 'DEFAULT')
         
-            if self.args.signal in config.sections():
+            if self.args.signal.upper() in config.sections():
                 signal_name = (self.args.signal).upper()
                 params = self.parseConfig(config, signal_name, params)
         
@@ -139,7 +139,7 @@ class TerminalApp():
         Send signals and return predictions
         '''
         self.updateConfigs()
-        data = self.Tektronix.acquire_block_iq(1024, self.params['num_records'])
+        data = self.Tektronix.acquire_block_iq(self.params['record_length'], self.params['num_records'])
         url = 'http://' + self.params['server_ip'] + ':3000/predict'
         predictions = predict_post(url, data, self.params['center_freq'], self.params['filter_check'])
         results = {"data": data,
