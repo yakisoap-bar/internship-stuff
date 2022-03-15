@@ -89,9 +89,9 @@ class TerminalApp():
             config = configparser.ConfigParser()
             config.read(self.args.conf_file)
             params = self.parseConfig(config, 'DEFAULT')
+            signal_name = (self.args.signal).upper()
         
-            if self.args.signal.upper() in config.sections():
-                signal_name = (self.args.signal).upper()
+            if signal_name in config.sections():
                 params = self.parseConfig(config, signal_name, params)
         
             return params
