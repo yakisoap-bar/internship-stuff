@@ -3,16 +3,9 @@ import argparse, configparser
 import matplotlib.pyplot as plt
 import numpy as np
 
-# SA
-from Functions.Tektronix import Tektronix
-from Functions.Request import *
-
-# Plotting
+from Functions.plutoSDR import PlutoSDR
 from Functions.Request import predict_post
 from Functions.Plot import Plot
-
-# Misc
-from Functions.Utils import createBanner
 
 class TerminalApp():
     def __init__(self) -> None:
@@ -31,28 +24,14 @@ class TerminalApp():
     def globalVars(self):
         '''Init vars'''
         self.run_count = 0
-        self.Plot = Plot()
-        self.Tektronix = Tektronix()
     
-    def start(self):
-        if self.args.battery:
-            print(self.getBatt())
-        elif self.args.check_params:
-            print(self.readConf())
-        else:
-            self.runPredictions()
-        
-    def getBatt(self):
-        batt = self.Tektronix.getBatteryStatys()
-        return batt
-
-    def runPredictions(self):
-        predictions = self.predict()
-        self.genBarChart(predictions)
+    def run(self):
+        data, predictions = self.predict()
+        self.genBarChart(predictions, data)
         
         if self.run_count != 1:
             self.run_count -= 1
-            self.runPredictions()()
+            self.run()
         
     def parseArgs(self):
         '''argparse'''
@@ -71,7 +50,7 @@ class TerminalApp():
                             nargs='?', default='params.conf', type=str,
                             help="Specify configuration file.")
         parser.add_argument('-s', '--signal',
-                            dest="signal",
+                            dest="signal", metavar="configFile",
                             nargs='?', type=str,
                             help="Select default signal parameters")
         parser.add_argument('-r', '--run',
@@ -92,6 +71,7 @@ class TerminalApp():
         Load and parse config file
         returns params
         '''
+
         try:
             # Read default configs
             config = configparser.ConfigParser()
@@ -129,40 +109,45 @@ class TerminalApp():
                 item = int(float(item))
             elif setting in boolParams:
                 item = bool(item)
-
+            
             params[setting] = item
-
+        
         return params
-
+        
     def predict(self):
         '''
         Send signals and return predictions
         '''
         self.updateConfigs()
-        data = self.Tektronix.acquire_block_iq(self.params['record_length'], self.params['num_records'])
+        data = self.SDR.collect_iq()
         url = 'http://' + self.params['server_ip'] + ':3000/predict'
         predictions = predict_post(url, data, self.params['center_freq'], self.params['filter_check'])
-        results = {"data": data,
-					"predictions": predictions}
-        return results
+        
+        return [data, predictions]
     
-    def genBarChart(self, predictions):
-        self.Plot.drawChart(predictions)
+    def genBarChart(self, predictions, data):
+        chart = Plot()
+        chart.drawChart({'data': data, 'predictions': predictions})
 
     def initSDR(self):
         '''Init SDR'''
-        self.Tektronix.device_connect()
+        self.SDR = PlutoSDR()
+        print(self.params)
+        self.SDR.initConfig(self.params['center_freq'], self.params['rx_bandwidth'], self.params['num_records'])
     
     def updateConfigs(self):
         '''Update SDR configs, if empty, no change'''
         params = self.readConf()
         if params != self.params:
             self.params = params
-            self.Tektronix.config_block_iq(self.params['center_freq'], self.params['ref_level'], self.params['rx_bandwidth'], 1024)
+            try:
+                self.SDR.config(self.params)
+            except: # Invalid config
+                pass
 
 def main():
     app = TerminalApp()
-    app.start()
+    app.run()
     exit()
 
 if __name__ == '__main__':

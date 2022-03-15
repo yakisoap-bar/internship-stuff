@@ -2,7 +2,10 @@
 import argparse, configparser
 import matplotlib.pyplot as plt
 import numpy as np
-from Functions.plutoSDR import PlutoSDR
+
+# SA
+from Functions.Tektronix import Tektronix
+from Functions.Request import *
 
 # Plotting
 from Functions.Request import predict_post
@@ -136,7 +139,7 @@ class TerminalApp():
         Send signals and return predictions
         '''
         self.updateConfigs()
-        data = self.SDR.collect_iq()
+        data = self.Tektronix.acquire_block_iq(self.params['record_length'], self.params['num_records'])
         url = 'http://' + self.params['server_ip'] + ':3000/predict'
         predictions = predict_post(url, data, self.params['center_freq'], self.params['filter_check'])
         results = {"data": data,
@@ -148,15 +151,14 @@ class TerminalApp():
 
     def initSDR(self):
         '''Init SDR'''
-        self.SDR = PlutoSDR()
-        self.SDR.initConfig(self.params['center_freq'], self.params['rx_bandwidth'], self.params['num_records'])
+        self.Tektronix.device_connect()
     
     def updateConfigs(self):
         '''Update SDR configs, if empty, no change'''
         params = self.readConf()
         if params != self.params:
             self.params = params
-            self.SDR.config(self.params)
+            self.Tektronix.config_block_iq(self.params['center_freq'], self.params['ref_level'], self.params['rx_bandwidth'], 1024)
 
 def main():
     app = TerminalApp()
