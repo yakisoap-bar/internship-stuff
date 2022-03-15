@@ -114,9 +114,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.config_layout.addRow(self.cf_input, self.cf_dropdown)
         self.config_layout.addRow(self.bandwidth_label)
         self.config_layout.addRow(self.bandwidth_input, self.bandwidth_dropdown)
-        self.config_layout.addRow(self.ref_lvl_label, self.ref_lvl_input)
-        self.config_layout.addRow(self.ref_lvl_slider)
-        self.config_layout.addRow(self.sampling_freq_label, self.sampling_freq_input)
+        # self.config_layout.addRow(self.ref_lvl_label, self.ref_lvl_input)
+        # self.config_layout.addRow(self.ref_lvl_slider)
+        # self.config_layout.addRow(self.sampling_freq_label, self.sampling_freq_input)
     
     def getScreenRes(self):
         screen = QtWidgets.QApplication.primaryScreen()
@@ -143,7 +143,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.params["rx_bandwidth"] = int(self.params["bwVal"]*(self.multipliers[self.params['bwMultiplier']]))
 
         createBanner("Configurations", dictToStr(self.params))
-        self.SDR.config(self.params)
     
     def configFilter(self):
         self.filter_label = QtWidgets.QLabel("Enable filtering")
@@ -302,7 +301,7 @@ class MainWindow(QtWidgets.QMainWindow):
         pass
 
     def runAnalysisThread(self):
-        self.worker = Worker(self.params) # init thread
+        self.worker = Worker(self.params, self.Tektronix) # init thread
         self.worker.moveToThread(self.analysis_thread)
         self.analysis_thread.started.connect(self.worker.runAnalysis)
         self.analysis_thread.start()
@@ -337,8 +336,7 @@ class Worker(QtCore.QObject):
     def __init__(self, params, SDR=None) -> None:
         super().__init__()
         self.params = params
-        if SDR != None:
-            self.SDR = SDR
+        self.Tektronix = SDR
 
     def runAnalysis(self):
         self.started.emit()

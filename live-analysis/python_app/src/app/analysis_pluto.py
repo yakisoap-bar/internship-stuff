@@ -108,9 +108,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.config_layout.addRow(self.cf_input, self.cf_dropdown)
         self.config_layout.addRow(self.bandwidth_label)
         self.config_layout.addRow(self.bandwidth_input, self.bandwidth_dropdown)
-        self.config_layout.addRow(self.ref_lvl_label, self.ref_lvl_input)
-        self.config_layout.addRow(self.ref_lvl_slider)
-        self.config_layout.addRow(self.sampling_freq_label, self.sampling_freq_input)
+        # self.config_layout.addRow(self.ref_lvl_label, self.ref_lvl_input)
+        # self.config_layout.addRow(self.ref_lvl_slider)
+        # self.config_layout.addRow(self.sampling_freq_label, self.sampling_freq_input)
     
     def getScreenRes(self):
         screen = QtWidgets.QApplication.primaryScreen()

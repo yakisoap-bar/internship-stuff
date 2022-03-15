@@ -1,6 +1,6 @@
 import sys
 from PyQt5 import QtWidgets
-from app.analysis_pluto import MainWindow
+from app.analysis_SA import MainWindow
 
 # Run the application
 def main():
