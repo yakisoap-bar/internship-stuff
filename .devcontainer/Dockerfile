@@ -17,5 +17,8 @@ RUN if [ -f "/tmp/conda-tmp/environment.yml" ]; then umask 0002 && /opt/conda/bi
 #     && apt-get -y install --no-install-recommends <your-package-list-here>
 
 # custom installation stuff
-RUN pip install tensorflow==2.5.0
 RUN conda install -y cudnn
+RUN pip install tensorflow==2.6.0
+
+# unbrick tensorflow
+RUN yes | pip uninstall keras && pip install keras==2.6.0
