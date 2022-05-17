@@ -120,7 +120,7 @@ During the development of the ResNet model, we were raised the question: _What w
 
 #### _Open-set ResNet with omitted SA data_
 
-After some research, we came across a research paper that experimented on using open-set classification to detect signals from unknown transmittors, which we thought could be adapted to our own open-set problem. 
+After some research, we came across a research paper [^1] that experimented on using open-set classification to detect signals from unknown transmittors, which we thought could be adapted to our own open-set problem. 
 
 ## The A P P L I C A T I O N
 
