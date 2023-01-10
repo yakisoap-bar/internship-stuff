@@ -218,37 +218,9 @@ When we started working on this technique, we hypothesized that the AANN would p
 
 As seen above, the AANN method did not perform as we expected, with many of the models simply not able to properly differentiate between the signal type it was trained on and other signal types. A large variety of methods were tested, including modifying the model structure, changing how the error scores were calculated during training to provide better feedback to the model, making use of other methods in the process, or a combination of any and all of them. We tested more than 10 different variations of the model to little avail, all showing either marginal improvement or none at all.
 
-## The Application
-
-For better visualisation of progress ~~but really more for a cooler demo~~, the scope was expanded to develop an application that would allow for the live collection of 
-
-### How to use
-
-> Very skippable. At most just click through and find out :eyes:
-
-### Architecture
-
-The app went through several changes in architecture in stage of development.
-
-#### POC
-
-![Implementation 1](./assets/appArchitecture_1.png)
-
-To allow for portability, 
-
-### Using SDRs
-
-### GUI
-
-#### _Web Version_
-
-#### _PyQt_
-
 ## Links, sinks, and other hijinks
 
 [^1]: Deep Learning Approaches for Open Set Wireless
 Transmitter Authorization: <https://arxiv.org/pdf/2002.07777.pdf>
 [^2]: Classification of Communication Signals and Detection of
 Unknown Formats Using Artificial Neural Networks: <https://www.sto.nato.int/publications/STO%20Meeting%20Proceedings/RTO-MP-IST-054/MP-IST-054-P06.pdf>
-
-## Future Work??
